@@ -6,7 +6,7 @@
   "scripts": {
     "setup": "npm i && dfx canister create backend && dfx generate backend && dfx deploy",
     "start": "run-p frontend backend",
-    "frontend": "vite --port 3000",
+    "frontend": "vite --port 5000",
     "backend": "mo-dev --generate --deploy -y",
     "build": "tsc && vite build",
     "test": "run-s test:backend test:frontend",
