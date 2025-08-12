@@ -3,16 +3,14 @@ import './App.css';
 import { useState } from 'react';
 import { BrowserRouter, Route, Router, Routes } from 'react-router-dom';
 import Template from './templates/Template';
-import Wallet from './pages/Wallet';
+import Home from './pages/Home';
 
 function App() {
   return (
     <BrowserRouter>
-      <Template>
-        <Routes>
-          <Route path="/" element={<Wallet />} />
-        </Routes>
-      </Template>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
     </BrowserRouter>
   );
 }
