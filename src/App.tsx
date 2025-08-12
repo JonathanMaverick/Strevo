@@ -47,7 +47,7 @@ function App() {
           <img src={viteLogo} className="logo vite" alt="Vite logo" />
         </a>
         <a href="https://reactjs.org" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo"/>
+          <img src={reactLogo} className="logo react" alt="React logo" />
         </a>
         <a
           href="https://internetcomputer.org/docs/current/developer-docs/build/cdks/motoko-dfinity/motoko/"
@@ -65,7 +65,7 @@ function App() {
         </a>
       </div>
 
-      <h1>Vite + React + Motoko</h1>
+      <h1>Vite + React + Motokoss</h1>
 
       <div className="card">
         <button onClick={increment} disabled={loading}>
