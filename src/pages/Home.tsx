@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { PlayCircle, Menu, X, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function Home() {
+
   const categories = [
     'All',
     'FPS',

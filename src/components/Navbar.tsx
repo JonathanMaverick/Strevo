@@ -1,9 +1,24 @@
 import { useQueryCall, useUpdateCall } from '@ic-reactor/react';
-import { ArrowRight, Menu, PlayCircle, X } from 'lucide-react';
-import React, { useState } from 'react';
+import { Menu, PlayCircle, X } from 'lucide-react';
+import { useState } from 'react';
+import { ConnectButton, ConnectDialog, useBalance, useConnect, useWallet } from "@connect2ic/react";
+import "@connect2ic/core/style.css";
 
 export default function Navbar() {
+  const { isConnected, principal, disconnect } = useConnect();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // TODO: Kalau user pertama kali register wallet nya ke program kita, bakal ke page register(?), untuk create account
+  // Biar bisa ada username, liat dia following siapa, dkk
+  // Ref : https://claude.ai/share/00017dd4-909d-4c27-b192-16814243d3ca
+
+  //Cara akses wallet dan balance dia
+  const wallet = useWallet()
+  const [assets] = useBalance()
+  const icpAsset = assets ? assets.find((asset) => asset.name === 'ICP') : undefined;
+
+  console.log(wallet)
+  console.log(icpAsset)
 
   const { data: count, refetch } = useQueryCall({
     functionName: 'get',
@@ -13,30 +28,6 @@ export default function Navbar() {
     functionName: 'inc',
     onSuccess: refetch,
   });
-
-  const [walletConnected, setWalletConnected] = useState(false);
-  const [principal, setPrincipal] = useState<string | null>(null);
-
-  const connectWallet = async () => {
-    if (!window.ic || !window.ic.plug) {
-      alert('Plug wallet not detected. Please install it first!');
-      return;
-    }
-    try {
-      const connected = await window.ic.plug.requestConnect();
-      if (connected) {
-        const principal = await window.ic.plug.agent.getPrincipal();
-        setPrincipal(principal.toText());
-        setWalletConnected(true);
-        alert('Wallet connected! Principal: ' + principal.toText());
-      } else {
-        alert('User rejected the connection.');
-      }
-    } catch (err) {
-      console.error('Error connecting wallet:', err);
-      alert('Failed to connect wallet.');
-    }
-  };
 
   return (
     <header className="relative z-50 border-b border-white/5">
@@ -63,16 +54,22 @@ export default function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          {!walletConnected ? (
-            <button
-              onClick={connectWallet}
-              className="group inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium shadow-lg shadow-sky-600/30 hover:opacity-95"
-            >
+          {!isConnected ? (
+            <ConnectButton >
               Connect Wallet
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-            </button>
+            </ConnectButton>
           ) : (
-            <p>Wallet Connected: {principal}</p>
+            <div className="flex items-center gap-3">
+              <span className="text-sm text-white/80">
+                Connected: {principal?.slice(0, 8)}...{principal?.slice(-4)}
+              </span>
+              <button
+                onClick={disconnect}
+                className="text-sm text-white/60 hover:text-white/80"
+              >
+                Disconnect
+              </button>
+            </div>
           )}
         </div>
 
@@ -121,18 +118,27 @@ export default function Navbar() {
                 </a>
               ))}
               <div className="pt-2">
-                <a
-                  href="#"
-                  className="group inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium shadow-lg shadow-sky-600/30 hover:opacity-95"
-                >
-                  Go live{' '}
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
-                </a>
+                {!isConnected ? (
+                  <ConnectButton></ConnectButton>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <span className="text-xs text-white/60 text-center">
+                      {principal?.slice(0, 12)}...{principal?.slice(-8)}
+                    </span>
+                    <button
+                      onClick={disconnect}
+                      className="w-full rounded-xl border border-white/20 px-4 py-2 text-sm text-white/80 hover:bg-white/5"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
       )}
+      <ConnectDialog></ConnectDialog>
     </header>
   );
 }

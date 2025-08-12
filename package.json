@@ -17,6 +17,9 @@
     "postinstall": "mops install"
   },
   "dependencies": {
+    "@connect2ic/core": "^0.2.0-beta.24",
+    "@connect2ic/react": "^0.2.0-beta.24",
+    "@dfinity/auth-client": "^3.2.0",
     "@ic-reactor/react": "^1.14.6",
     "@tailwindcss/vite": "^4.1.11",
     "framer-motion": "^12.23.12",
