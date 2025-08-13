@@ -95,7 +95,7 @@ export default function Home() {
     const payload: SocketMessage<ChatMessage> = {
       type: SocketMessageType.ChatMessage,
       data: {
-        userId: 'nigga',
+        userId: 'nigg',
         streamId: 'test',
         content
       }
