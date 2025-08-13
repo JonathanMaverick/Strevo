@@ -51,14 +51,14 @@ export default function Navbar() {
         </a>
 
         <div className="hidden items-center gap-8 md:flex">
-          <a href="#" className="text-sm text-white/80 hover:text-white">
+          <a href="/" className="text-sm text-white/80 hover:text-white">
             Browse
           </a>
-          <a href="#" className="text-sm text-white/80 hover:text-white">
+          <a
+            href="/following"
+            className="text-sm text-white/80 hover:text-white"
+          >
             Following
-          </a>
-          <a href="#" className="text-sm text-white/80 hover:text-white">
-            Esports
           </a>
         </div>
 
