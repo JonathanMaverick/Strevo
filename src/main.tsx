@@ -8,9 +8,9 @@ import './index.scss';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <AgentProvider withProcessEnv>
-        <ActorProvider idlFactory={idlFactory} canisterId={canisterId}>
-          <App />
-        </ActorProvider>
+      <ActorProvider idlFactory={idlFactory} canisterId={canisterId}>
+        <App />
+      </ActorProvider>
     </AgentProvider>
   </React.StrictMode>,
 );
