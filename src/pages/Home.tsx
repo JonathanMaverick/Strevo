@@ -2,14 +2,14 @@ import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { SocketMessageType } from "../enums/socket-message-type";
-import { ChatMessage } from "../interfaces/chat-message";
-import { SocketMessage } from "../interfaces/socket-message";
+import { SocketMessageType } from '../enums/socket-message-type';
+import { ChatMessage } from '../interfaces/chat-message';
+import { SocketMessage } from '../interfaces/socket-message';
 
 export default function Home() {
   const socketRef = useRef<WebSocket>(null!);
   const messageInputRef = useRef<HTMLInputElement>(null!);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const categories = [
     'All',
     'FPS',
@@ -82,8 +82,8 @@ export default function Home() {
   ];
 
   const handleIncomingMessage = (data: ChatMessage) => {
-    setChatMessages(prev => [...prev, data])
-  }
+    setChatMessages((prev) => [...prev, data]);
+  };
 
   const handleSendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,27 +96,31 @@ export default function Home() {
       data: {
         userId: 'nigg',
         streamId: 'test',
-        content
-      }
+        content,
+      },
     };
 
     socketRef.current.send(JSON.stringify(payload));
-    messageInputRef.current.value = "";
-  }
+    messageInputRef.current.value = '';
+  };
 
   useEffect(() => {
-    socketRef.current = new WebSocket(process.env.VITE_CHAT_SERVICE_URL! + '/aasd');
+    socketRef.current = new WebSocket(
+      process.env.VITE_CHAT_SERVICE_URL! + '/aasd',
+    );
     socketRef.current.onmessage = (event) => {
       const message: SocketMessage<ChatMessage> = JSON.parse(event.data);
       switch (message.type) {
-        case SocketMessageType.ChatMessage: handleIncomingMessage(message.data); break;
+        case SocketMessageType.ChatMessage:
+          handleIncomingMessage(message.data);
+          break;
       }
     };
 
     return () => {
       socketRef.current.close();
-    }
-  }, [])
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">
@@ -248,7 +252,8 @@ export default function Home() {
                 <div className="text-[10px] text-white/60">Live</div>
               </div>
               <div className="h-[26rem] space-y-3 overflow-y-auto px-4 pb-4">
-                {/*[
+                {
+                  /*[
                   { name: 'modbot', msg: 'Welcome to the stream! Be kind.' },
                   { name: 'aimtrain', msg: 'let’s gooo' },
                   { name: 'clutchguy', msg: 'that headshot was clean' },
@@ -256,12 +261,13 @@ export default function Home() {
                   { name: 'beatlab', msg: 'queue next match?' },
                   { name: 'nova', msg: 'eco round, play safe' },
                 ]*/
-               chatMessages.map((m, i) => (
-                  <div key={i} className="text-xs">
-                    <span className="text-white/60">{m.userId}:</span>{' '}
-                    <span className="text-white/90">{m.content}</span>
-                  </div>
-                ))}
+                  chatMessages.map((m, i) => (
+                    <div key={i} className="text-xs">
+                      <span className="text-white/60">{m.userId}:</span>{' '}
+                      <span className="text-white/90">{m.content}</span>
+                    </div>
+                  ))
+                }
               </div>
               <form onSubmit={handleSendMessage}>
                 <div className="flex items-center gap-2 border-t border-white/10 p-3">

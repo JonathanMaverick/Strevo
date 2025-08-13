@@ -1,6 +1,5 @@
-
 export interface ChatMessage {
-    streamId: string
-    userId: string
-    content: string
+  streamId: string;
+  userId: string;
+  content: string;
 }
