@@ -1,5 +1,6 @@
 import { Menu, PlayCircle, X, User, UserPlus } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { ConnectButton, ConnectDialog, useConnect } from '@connect2ic/react';
 import { useUserAuth } from '../services/userAuthService';
 
@@ -21,7 +22,7 @@ export default function Navbar() {
     if (isConnected && principal) {
       handleLogin();
     }
-  }, [isConnected, principal]);
+  }, [isConnected, principal, handleLogin]);
 
   const handleRegisterSubmit = async (formData: FormData) => {
     const username = formData.get('username') as string;
@@ -62,24 +63,26 @@ export default function Navbar() {
     }
 
     if (userLoading) {
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-white/60">
-          Wallet: {principal?.slice(0, 8)}...{principal?.slice(-4)}
-        </span>
-        <button
-          onClick={() => setShowRegisterModal(true)}
-          className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
-        >
-          <UserPlus className="h-4 w-4" />
-          Loading.....
-        </button>
-        <button
-          onClick={disconnect}
-          className="text-sm text-white/60 hover:text-white/80"
-        >
-          Disconnect
-        </button>
-      </div>;
+      return (
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-white/60">
+            Wallet: {principal?.slice(0, 8)}...{principal?.slice(-4)}
+          </span>
+          <button
+            onClick={() => setShowRegisterModal(true)}
+            className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
+          >
+            <UserPlus className="h-4 w-4" />
+            Loading...
+          </button>
+          <button
+            onClick={disconnect}
+            className="text-sm text-white/60 hover:text-white/80"
+          >
+            Disconnect
+          </button>
+        </div>
+      );
     }
 
     return (
@@ -108,22 +111,25 @@ export default function Navbar() {
     <>
       <header className="relative z-50 border-b border-white/5">
         <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-          <a href="#" className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/25">
               <PlayCircle className="h-5 w-5" />
             </div>
             <span className="text-lg font-semibold tracking-tight">
               ICP Stream
             </span>
-          </a>
+          </Link>
 
           <div className="hidden items-center gap-8 md:flex">
-            <a href="#" className="text-sm text-white/80 hover:text-white">
+            <Link to="/" className="text-sm text-white/80 hover:text-white">
               Browse
-            </a>
-            <a href="#" className="text-sm text-white/80 hover:text-white">
+            </Link>
+            <Link
+              to="/following"
+              className="text-sm text-white/80 hover:text-white"
+            >
               Following
-            </a>
+            </Link>
             <a href="#" className="text-sm text-white/80 hover:text-white">
               Esports
             </a>
@@ -164,18 +170,18 @@ export default function Navbar() {
               </div>
               <div className="space-y-2 px-4 pb-6">
                 {[
-                  { href: '#', label: 'Browse' },
-                  { href: '#', label: 'Following' },
-                  { href: '#', label: 'Esports' },
+                  { to: '/', label: 'Browse' },
+                  { to: '/following', label: 'Following' },
+                  { to: '#', label: 'Esports' },
                 ].map((i) => (
-                  <a
-                    key={i.href}
-                    href={i.href}
+                  <Link
+                    key={i.label}
+                    to={i.to}
                     onClick={() => setMobileOpen(false)}
                     className="block rounded-xl border border-white/10 p-3 text-sm text-white/90 hover:bg-white/5"
                   >
                     {i.label}
-                  </a>
+                  </Link>
                 ))}
                 <div className="pt-2">
                   <div className="w-full">{renderUserStatus()}</div>
@@ -233,14 +239,14 @@ export default function Navbar() {
                   htmlFor="profile_picture"
                   className="block text-sm font-medium text-white/80 mb-2"
                 >
-                  Profile Picture
+                  Profile Picture (URL)
                 </label>
                 <input
                   type="text"
                   id="profile_picture"
                   name="profile_picture"
                   className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  placeholder="Enter your email"
+                  placeholder="https://example.com/avatar.png"
                 />
               </div>
 
@@ -256,6 +262,7 @@ export default function Navbar() {
                   type="submit"
                   className="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium text-white hover:from-sky-600 hover:to-blue-700 disabled:opacity-50"
                 >
+                  Create account
                 </button>
               </div>
             </form>

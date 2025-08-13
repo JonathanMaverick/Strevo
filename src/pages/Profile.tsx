@@ -1,0 +1,438 @@
+import React, { useState } from 'react';
+import { motion } from 'framer-motion';
+import {
+  PlayCircle,
+  Share2,
+  Bell,
+  Heart,
+  Crown,
+  Users,
+  Calendar,
+  Clock,
+  Settings,
+} from 'lucide-react';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+
+export default function Profile() {
+  const [activeTab, setActiveTab] = useState<
+    'videos' | 'clips' | 'about' | 'schedule'
+  >('videos');
+
+  const stats = [
+    { label: 'Followers', value: '340K', icon: Users },
+    { label: 'Subscribers', value: '12.8K', icon: Crown },
+    { label: 'Live Avg', value: '9.4K', icon: PlayCircle },
+  ];
+
+  const videos = Array.from({ length: 8 }).map((_, i) => ({
+    title: `Scrim VOD #${i + 1} — Immortal grind`,
+    views: `${(Math.random() * 200 + 50).toFixed(1)}K`,
+    length: `${Math.floor(Math.random() * 2) + 1}h ${Math.floor(Math.random() * 59)}m`,
+    tag: i % 3 === 0 ? 'FPS' : i % 3 === 1 ? 'Ranked' : 'Coaching',
+    color: 'from-slate-700 via-slate-800 to-black',
+  }));
+
+  const clips = Array.from({ length: 6 }).map((_, i) => ({
+    title: `Nasty flick on Bind #${i + 1}`,
+    views: `${(Math.random() * 900 + 100).toFixed(0)}K`,
+    length: `0:${Math.floor(Math.random() * 59)
+      .toString()
+      .padStart(2, '0')}`,
+    color: 'from-slate-700 via-slate-800 to-black',
+  }));
+
+  const schedule = [
+    { day: 'Mon', time: '19:00–23:00 WIB', note: 'Ranked grind' },
+    { day: 'Tue', time: '19:00–23:00 WIB', note: 'Scrims + review' },
+    { day: 'Wed', time: 'Off', note: '—' },
+    { day: 'Thu', time: '19:00–23:00 WIB', note: 'Coaching live' },
+    { day: 'Fri', time: '20:00–24:00 WIB', note: 'Community games' },
+    { day: 'Sat', time: 'Variable', note: 'Tournament days' },
+    { day: 'Sun', time: '18:00–22:00 WIB', note: 'Variety' },
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#0A0E17] text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed inset-0 overflow-hidden"
+      >
+        <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-600/30 via-sky-500/20 to-cyan-400/20 blur-3xl" />
+        <div className="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-gradient-to-tr from-indigo-600/25 via-blue-600/20 to-sky-400/10 blur-[100px]" />
+      </div>
+
+      <Navbar />
+
+      <main className="relative mx-auto max-w-7xl px-4 sm:px-6">
+        <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] overflow-visible">
+          <div className="relative h-48 w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-black">
+            <div className="absolute inset-0 bg-[radial-gradient(60rem_25rem_at_20%_20%,rgba(59,130,246,0.25),transparent)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(50rem_20rem_at_80%_70%,rgba(14,165,233,0.25),transparent)]" />
+          </div>
+
+          <div className="flex flex-col gap-4 px-4 pb-4 sm:px-6 sm:pb-6">
+            <div className="-mt-10 flex items-end gap-4 z-[100]">
+              <img
+                alt="avatar"
+                src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
+                className="h-20 w-20 rounded-2xl ring-2 ring-white/10"
+              />
+              <div className="flex-1">
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <h1 className="text-xl font-semibold leading-tight">
+                      NovaSpectre
+                    </h1>
+                    <p className="mt-1 text-sm text-white/70">
+                      FPS • Competitive • Coaching
+                    </p>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2 sm:mt-0">
+                    <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
+                      <PlayCircle className="h-4 w-4" />
+                      Watch Live
+                    </button>
+                    <button className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
+                      Follow
+                    </button>
+                    <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
+                      <Crown className="h-4 w-4" />
+                      Subscribe
+                    </button>
+                    <button
+                      className="rounded-xl border border-white/10 p-2 hover:border-white/20"
+                      aria-label="Notifications"
+                    >
+                      <Bell className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="rounded-xl border border-white/10 p-2 hover:border-white/20"
+                      aria-label="Share"
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </button>
+                    <button
+                      className="rounded-xl border border-white/10 p-2 hover:border-white/20"
+                      aria-label="Settings"
+                    >
+                      <Settings className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-2 grid gap-3 sm:grid-cols-3">
+              {stats.map((s, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
+                >
+                  <s.icon className="h-4 w-4 text-white/80" />
+                  <div>
+                    <div className="text-sm font-semibold">{s.value}</div>
+                    <div className="text-[11px] uppercase tracking-wide text-white/60">
+                      {s.label}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-6 grid gap-6 lg:grid-cols-3">
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-2"
+          >
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="text-sm font-semibold">Featured</div>
+                <div className="text-[10px] text-white/60">1080p • 60fps</div>
+              </div>
+              <div className="aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-700 via-slate-800 to-black">
+                <div className="flex h-full items-center justify-center">
+                  <button className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
+                    <PlayCircle className="h-4 w-4" />
+                    Play
+                  </button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between px-4 py-3">
+                <div>
+                  <p className="text-sm font-semibold">
+                    Pro scrims — finals practice
+                  </p>
+                  <p className="text-xs text-white/60">12.4K watching • FPS</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
+                    Follow
+                  </button>
+                  <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
+                    <Heart className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <div className="flex gap-2 overflow-x-auto">
+                {[
+                  { key: 'videos', label: 'Videos' },
+                  { key: 'clips', label: 'Clips' },
+                  { key: 'about', label: 'About' },
+                  { key: 'schedule', label: 'Schedule' },
+                ].map((t) => (
+                  <button
+                    key={t.key}
+                    onClick={() => setActiveTab(t.key as typeof activeTab)}
+                    className={`rounded-full border px-3 py-1.5 text-xs ${
+                      activeTab === t.key
+                        ? 'border-white/20 bg-white/10 font-semibold'
+                        : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-4">
+                {activeTab === 'videos' && (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {videos.map((v, i) => (
+                      <a
+                        key={i}
+                        href="#"
+                        className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
+                      >
+                        <div
+                          className={`relative aspect-video w-full bg-gradient-to-br ${v.color}`}
+                        >
+                          <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                            {v.tag}
+                          </div>
+                          <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                            {v.length}
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          <p className="line-clamp-1 text-sm font-medium">
+                            {v.title}
+                          </p>
+                          <p className="mt-1 text-xs text-white/60">
+                            {v.views} views
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === 'clips' && (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {clips.map((c, i) => (
+                      <a
+                        key={i}
+                        href="#"
+                        className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
+                      >
+                        <div
+                          className={`relative aspect-video w-full bg-gradient-to-br ${c.color}`}
+                        >
+                          <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                            {c.length}
+                          </div>
+                        </div>
+                        <div className="p-3">
+                          <p className="line-clamp-1 text-sm font-medium">
+                            {c.title}
+                          </p>
+                          <p className="mt-1 text-xs text-white/60">
+                            {c.views} views
+                          </p>
+                        </div>
+                      </a>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === 'about' && (
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                    <p className="text-sm text-white/80">
+                      Hi, I’m <span className="font-semibold">NovaSpectre</span>{' '}
+                      — competitive FPS player focused on improvement and
+                      coaching. I stream scrims, ranked climbs, and VOD reviews.
+                      Business:{' '}
+                      <span className="text-white/90">
+                        contact@novaspectre.gg
+                      </span>
+                    </p>
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                        <div className="text-xs text-white/60">Gear</div>
+                        <div className="mt-1 text-sm">
+                          XM27 Pro • Sense 0.45 • 800 DPI
+                        </div>
+                      </div>
+                      <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
+                        <div className="text-xs text-white/60">PC Specs</div>
+                        <div className="mt-1 text-sm">
+                          7800X3D • 4070 Ti • 32GB
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === 'schedule' && (
+                  <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+                    <div className="flex items-center justify-between px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4" />
+                        <div className="text-sm font-semibold">
+                          Stream Schedule
+                        </div>
+                      </div>
+                      <div className="text-[10px] text-white/60 flex items-center gap-1">
+                        <Clock className="h-3.5 w-3.5" /> WIB
+                      </div>
+                    </div>
+                    <div className="divide-y divide-white/5">
+                      {schedule.map((s, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between px-4 py-3"
+                        >
+                          <div className="text-sm font-medium">{s.day}</div>
+                          <div className="text-xs text-white/80">{s.time}</div>
+                          <div className="text-[11px] text-white/60">
+                            {s.note}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          <motion.aside
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.05 }}
+            className="hidden lg:block"
+          >
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              <div className="px-4 py-3 text-sm font-semibold">
+                Channel Perks
+              </div>
+              <div className="divide-y divide-white/5">
+                {[
+                  {
+                    icon: Crown,
+                    title: 'Ad-free viewing',
+                    desc: 'Watch without interruptions.',
+                  },
+                  {
+                    icon: Heart,
+                    title: 'Custom emotes',
+                    desc: 'Access sub-only emotes.',
+                  },
+                  {
+                    icon: Users,
+                    title: 'Sub-only chat',
+                    desc: 'Priority in chat & games.',
+                  },
+                ].map((p, i) => (
+                  <div key={i} className="flex items-start gap-3 px-4 py-3">
+                    <p.icon className="mt-0.5 h-4 w-4 text-white/80" />
+                    <div>
+                      <div className="text-sm font-medium">{p.title}</div>
+                      <div className="text-xs text-white/60">{p.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="p-4">
+                <button className="w-full rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
+                  Subscribe
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              <div className="px-4 py-3 text-sm font-semibold">
+                Recent Supporters
+              </div>
+              <div className="divide-y divide-white/5">
+                {['salsa', 'beatlab', 'stacksmith', 'cozyroom', 'winaaa'].map(
+                  (n, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center justify-between px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <img
+                          alt="avatar"
+                          src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(n[0].toUpperCase()))}`}
+                          className="h-7 w-7 rounded-full ring-2 ring-white/10"
+                        />
+                        <div className="text-sm">{n}</div>
+                      </div>
+                      <div className="text-[10px] text-white/60">Sub</div>
+                    </div>
+                  ),
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              <div className="px-4 py-3 text-sm font-semibold">
+                Top Categories
+              </div>
+              <div className="flex flex-wrap gap-2 p-4 pt-0">
+                {['FPS', 'Ranked', 'Coaching', 'Analysis', 'Scrims'].map(
+                  (c) => (
+                    <span
+                      key={c}
+                      className="rounded-full border border-white/10 px-3 py-1 text-xs text-white/80"
+                    >
+                      {c}
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+          </motion.aside>
+        </section>
+      </main>
+
+      <Footer />
+    </div>
+  );
+}
+
+function avatarSvg(letter: string) {
+  return `
+  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0EA5E9"/>
+        <stop offset="100%" stop-color="#2563EB"/>
+      </linearGradient>
+      <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur in="SourceGraphic" stdDeviation="2"/>
+      </filter>
+    </defs>
+    <rect width="64" height="64" rx="14" fill="url(#g)"/>
+    <circle cx="18" cy="14" r="6" fill="#ffffff30" filter="url(#blur)"/>
+    <text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-size="28" font-family="Inter, system-ui" fill="white">${letter}</text>
+  </svg>`;
+}
