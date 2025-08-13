@@ -30,6 +30,7 @@ export default defineConfig({
   },
   plugins: [
     react(),
+    environment('all', {prefix: 'VITE_'}),
     environment('all', { prefix: 'CANISTER_' }),
     environment('all', { prefix: 'DFX_' }),
     tailwindcss(),

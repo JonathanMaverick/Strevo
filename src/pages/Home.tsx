@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { FormEvent, useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { PlayCircle, Menu, X, ArrowRight } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { SocketMessageType } from "../enums/socket-message-type";
+import { ChatMessage } from "../interfaces/chat-message";
+import { SocketMessage } from "../interfaces/socket-message";
 
 export default function Home() {
+  const socketRef = useRef<WebSocket>(null!);
+  const messageInputRef = useRef<HTMLInputElement>(null!);
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const categories = [
     'All',
     'FPS',
@@ -75,6 +81,43 @@ export default function Home() {
       color: 'from-slate-700 via-slate-800 to-black',
     },
   ];
+
+  const handleIncomingMessage = (data: ChatMessage) => {
+    setChatMessages(prev => [...prev, data])
+  }
+
+  const handleSendMessage = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const content = messageInputRef.current.value.trim();
+    if (content.length === 0) return;
+
+    const payload: SocketMessage<ChatMessage> = {
+      type: SocketMessageType.ChatMessage,
+      data: {
+        userId: 'nigga',
+        streamId: 'test',
+        content
+      }
+    };
+
+    socketRef.current.send(JSON.stringify(payload));
+    messageInputRef.current.value = "";
+  }
+
+  useEffect(() => {
+    socketRef.current = new WebSocket(process.env.VITE_CHAT_SERVICE_URL! + '/aasd');
+    socketRef.current.onmessage = (event) => {
+      const message: SocketMessage<ChatMessage> = JSON.parse(event.data);
+      switch (message.type) {
+        case SocketMessageType.ChatMessage: handleIncomingMessage(message.data); break;
+      }
+    };
+
+    return () => {
+      socketRef.current.close();
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">
@@ -206,29 +249,33 @@ export default function Home() {
                 <div className="text-[10px] text-white/60">Live</div>
               </div>
               <div className="h-[26rem] space-y-3 overflow-y-auto px-4 pb-4">
-                {[
+                {/*[
                   { name: 'modbot', msg: 'Welcome to the stream! Be kind.' },
                   { name: 'aimtrain', msg: 'let’s gooo' },
                   { name: 'clutchguy', msg: 'that headshot was clean' },
                   { name: 'salsa', msg: 'drop your sens?' },
                   { name: 'beatlab', msg: 'queue next match?' },
                   { name: 'nova', msg: 'eco round, play safe' },
-                ].map((m, i) => (
+                ]*/
+               chatMessages.map((m, i) => (
                   <div key={i} className="text-xs">
-                    <span className="text-white/60">{m.name}:</span>{' '}
-                    <span className="text-white/90">{m.msg}</span>
+                    <span className="text-white/60">{m.userId}:</span>{' '}
+                    <span className="text-white/90">{m.content}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex items-center gap-2 border-t border-white/10 p-3">
-                <input
-                  placeholder="Send a message"
-                  className="w-full rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
-                />
-                <button className="rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
-                  Send
-                </button>
-              </div>
+              <form onSubmit={handleSendMessage}>
+                <div className="flex items-center gap-2 border-t border-white/10 p-3">
+                  <input
+                    ref={messageInputRef}
+                    placeholder="Send a message"
+                    className="w-full rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
+                  />
+                  <button className="rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
+                    Send
+                  </button>
+                </div>
+              </form>
             </div>
 
             <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
