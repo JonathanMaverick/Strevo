@@ -38,7 +38,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/following" element={<Following />} />
-              <Route path="/stream" element={<Stream />} />
+              <Route path="/stream/:principalId" element={<Stream />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/profiles/:principalId" element={<Profiles />} />
               <Route
