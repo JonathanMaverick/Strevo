@@ -1,73 +1,144 @@
-import { Menu, PlayCircle, X, User, UserPlus } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import {
+  Menu,
+  PlayCircle,
+  X,
+  User,
+  UserPlus,
+  ChevronDown,
+  Settings,
+  LogOut,
+} from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ConnectButton, ConnectDialog, useConnect } from '@connect2ic/react';
 import { useUserAuth } from '../services/userAuthService';
+import RegisterModal from '../components/RegisterModal';
 
 export default function Navbar() {
   const { disconnect } = useConnect();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  const {
-    isConnected,
-    principal,
-    user,
-    handleLogin,
-    handleRegister
-  } = useUserAuth();
+  const menuRef = useRef<HTMLDivElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+
+  const { isConnected, principal, user, handleLogin, handleRegister } =
+    useUserAuth();
 
   useEffect(() => {
-    if (isConnected && principal) {
-      handleLogin();
-    }
+    if (isConnected && principal) handleLogin();
   }, [isConnected, principal, handleLogin]);
 
+  useEffect(() => {
+    const onPointerDown = (e: PointerEvent) => {
+      if (!menuOpen) return;
+      const t = e.target as Node;
+      if (menuRef.current?.contains(t) || triggerRef.current?.contains(t))
+        return;
+      setMenuOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) =>
+      e.key === 'Escape' && setMenuOpen(false);
 
-  const handleRegisterSubmit = async (formData: FormData) => {
-    const username = formData.get('username') as string;
-    const profile_picture = formData.get('profile_picture') as string;
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [menuOpen]);
 
-    try {
-      await handleRegister({
-        principal_id: principal,
-        username,
-        profile_picture,
-      });
-      setShowRegisterModal(false);
-    } catch (error) {
-      console.error('Registration error:', error);
-    }
+  const onRegister = async ({
+    username,
+    profile_picture,
+  }: {
+    username: string;
+    profile_picture: string;
+  }) => {
+    await handleRegister({
+      principal_id: principal,
+      username,
+      profile_picture,
+    });
+  };
+
+  const ProfileDropdown = () => {
+    if (!user) return null;
+    return (
+      <div className="relative z-[60]">
+        <button
+          ref={triggerRef}
+          type="button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10"
+        >
+          <div className="flex items-center gap-2">
+            <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600">
+              <User className="h-4 w-4" />
+            </div>
+            <span className="text-sm text-white/90">{user.username}</span>
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform ${menuOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {menuOpen && (
+          <div
+            ref={menuRef}
+            role="menu"
+            onClick={(e) => e.stopPropagation()}
+            className="absolute right-0 mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#0B1220]/95 shadow-2xl ring-1 ring-black/5 backdrop-blur"
+          >
+            <Link
+              to="/profile"
+              role="menuitem"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+            >
+              <User className="h-4 w-4" />
+              My Profile
+            </Link>
+            <Link
+              to="/settings"
+              role="menuitem"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+            >
+              <Settings className="h-4 w-4" />
+              Settings
+            </Link>
+            <button
+              role="menuitem"
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                disconnect();
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/90 hover:bg-white/5"
+            >
+              <LogOut className="h-4 w-4" />
+              Disconnect
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderUserStatus = () => {
-    if (!isConnected) {
-      return <ConnectButton>Connect Wallet</ConnectButton>;
-    }
-
-    if (user) {
-      return (
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <User className="h-4 w-4 text-sky-400" />
-            <span className="text-sm text-white/90">{user.username}</span>
-          </div>
-          <button
-            onClick={disconnect}
-            className="text-sm text-white/60 hover:text-white/80"
-          >
-            Disconnect
-          </button>
-        </div>
-      );
-    }
-
+    if (!isConnected) return <ConnectButton>Connect Wallet</ConnectButton>;
+    if (user) return <ProfileDropdown />;
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-white/60">
           Wallet: {principal?.slice(0, 8)}...{principal?.slice(-4)}
         </span>
         <button
+          type="button"
           onClick={() => setShowRegisterModal(true)}
           className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
         >
@@ -75,6 +146,7 @@ export default function Navbar() {
           Register
         </button>
         <button
+          type="button"
           onClick={disconnect}
           className="text-sm text-white/60 hover:text-white/80"
         >
@@ -117,7 +189,7 @@ export default function Navbar() {
           </div>
 
           <button
-            className="md:hidden inline-flex items-center justify-center rounded-lg border border-white/10 p-2"
+            className="inline-flex items-center justify-center rounded-lg border border-white/10 p-2 md:hidden"
             onClick={() => setMobileOpen(true)}
           >
             <Menu className="h-5 w-5" />
@@ -161,7 +233,80 @@ export default function Navbar() {
                   </Link>
                 ))}
                 <div className="pt-2">
-                  <div className="w-full">{renderUserStatus()}</div>
+                  {!isConnected ? (
+                    <ConnectButton>Connect Wallet</ConnectButton>
+                  ) : user ? (
+                    <div className="rounded-xl border border-white/10 p-3">
+                      <div className="mb-2 flex items-center gap-2">
+                        <div className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600">
+                          <User className="h-4 w-4" />
+                        </div>
+                        <span className="text-sm text-white/90">
+                          {user.username}
+                        </span>
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <Link
+                          to="/profile"
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+                        >
+                          <User className="h-4 w-4" />
+                          My Profile
+                        </Link>
+                        <Link
+                          to="/settings"
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+                        >
+                          <Settings className="h-4 w-4" />
+                          Settings
+                        </Link>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileOpen(false);
+                            disconnect();
+                          }}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-white/90 hover:bg-white/5"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Disconnect
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="text-sm text-white/60">
+                        {principal
+                          ? `Wallet: ${principal.slice(0, 8)}...${principal.slice(-4)}`
+                          : 'Wallet connected'}
+                      </span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileOpen(false);
+                            setShowRegisterModal(true);
+                          }}
+                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-sky-400 hover:text-sky-300"
+                        >
+                          <UserPlus className="h-4 w-4" />
+                          Register
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMobileOpen(false);
+                            disconnect();
+                          }}
+                          className="rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white/80"
+                        >
+                          Disconnect
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -171,81 +316,12 @@ export default function Navbar() {
         <ConnectDialog />
       </header>
 
-      {showRegisterModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="mx-4 w-full max-w-md rounded-2xl bg-[#0B1220] border border-white/10 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white">
-                Create Account
-              </h2>
-              <button
-                onClick={() => setShowRegisterModal(false)}
-                className="rounded-lg border border-white/10 p-1"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.currentTarget);
-                handleRegisterSubmit(formData);
-              }}
-              className="space-y-4"
-            >
-              <div>
-                <label
-                  htmlFor="username"
-                  className="block text-sm font-medium text-white/80 mb-2"
-                >
-                  Username
-                </label>
-                <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  required
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  placeholder="Enter your username"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="profile_picture"
-                  className="block text-sm font-medium text-white/80 mb-2"
-                >
-                  Profile Picture (URL)
-                </label>
-                <input
-                  type="text"
-                  id="profile_picture"
-                  name="profile_picture"
-                  className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  placeholder="https://example.com/avatar.png"
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowRegisterModal(false)}
-                  className="flex-1 rounded-lg border border-white/20 px-4 py-2 text-sm text-white/80 hover:bg-white/5"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium text-white hover:from-sky-600 hover:to-blue-700 disabled:opacity-50"
-                >
-                  Create account
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <RegisterModal
+        open={showRegisterModal}
+        onClose={() => setShowRegisterModal(false)}
+        onRegister={onRegister}
+        supabaseUrl={import.meta.env.VITE_SUPABASE_URL as string}
+      />
     </>
   );
 }

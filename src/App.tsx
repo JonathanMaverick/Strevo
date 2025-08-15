@@ -16,6 +16,8 @@ import { Connect2ICProvider } from '@connect2ic/react';
 import { SocketProvider } from './contexts/socket.context';
 import { ToastProvider } from './contexts/toast.context';
 import Profiles from './components/Profiles';
+import Settings from './pages/Settings';
+import Followers from './pages/Followers';
 
 function App() {
   const client = createClient({
@@ -37,7 +39,12 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/following" element={<Following />} />
               <Route path="/stream" element={<Stream />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/profiles/:principalId" element={<Profiles />} />
+              <Route
+                path="/profile/:principalId/followers"
+                element={<Followers />}
+              />
             </Routes>
           </SocketProvider>
         </ToastProvider>
