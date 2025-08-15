@@ -1,4 +1,4 @@
-import User "types";
+import User "Types";
 import RBTree "mo:base/RBTree";
 import Text "mo:base/Text";
 import Result "mo:base/Result";
