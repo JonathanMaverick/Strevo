@@ -105,7 +105,7 @@ export default function Home() {
   }
 
   useEffect(() => {
-    socketRef.current = new WebSocket(process.env.VITE_CHAT_SERVICE_URL! + '/aasd');
+    socketRef.current = new WebSocket(`ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/aasd`);
     socketRef.current.onmessage = (event) => {
       const message: SocketMessage<ChatMessage> = JSON.parse(event.data);
       switch (message.type) {

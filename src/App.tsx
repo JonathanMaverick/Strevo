@@ -10,6 +10,8 @@ import { createClient } from '@connect2ic/core';
 import { AstroX } from '@connect2ic/core/providers/astrox';
 import { PlugWallet } from '@connect2ic/core/providers/plug-wallet';
 import { Connect2ICProvider } from '@connect2ic/react';
+import { SocketProvider } from "./contexts/socket.context";
+import { ToastProvider } from "./contexts/toast.context";
 
 function App() {
   const client = createClient({
@@ -19,12 +21,16 @@ function App() {
   return (
     <BrowserRouter>
       <Connect2ICProvider client={client}>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/following" element={<Following />} />
-          <Route path="/stream" element={<Stream />} />
-        </Routes>
+        <ToastProvider>
+          <SocketProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/following" element={<Following />} />
+              <Route path="/stream" element={<Stream />} />
+            </Routes>
+          </SocketProvider>
+        </ToastProvider>
       </Connect2ICProvider>
     </BrowserRouter>
   );
