@@ -10,5 +10,12 @@ module {
     public type Following = {
        principal_id : Text;
        following : User; 
+    };
+
+    public type Subscribe = {
+        principal_id : Text;
+        subscribing: User;
+        start_date : Int;
+        end_date: Int;
     }
 }

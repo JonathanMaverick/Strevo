@@ -9,13 +9,22 @@ import '@connect2ic/core/style.css';
 import { createClient } from '@connect2ic/core';
 import { AstroX } from '@connect2ic/core/providers/astrox';
 import { PlugWallet } from '@connect2ic/core/providers/plug-wallet';
+import { InfinityWallet } from '@connect2ic/core/providers/infinity-wallet';
+import { StoicWallet } from '@connect2ic/core/providers/stoic-wallet';
+
 import { Connect2ICProvider } from '@connect2ic/react';
-import { SocketProvider } from "./contexts/socket.context";
-import { ToastProvider } from "./contexts/toast.context";
+import { SocketProvider } from './contexts/socket.context';
+import { ToastProvider } from './contexts/toast.context';
+import Profiles from './components/Profiles';
 
 function App() {
   const client = createClient({
-    providers: [new AstroX(), new PlugWallet()],
+    providers: [
+      new AstroX(),
+      new PlugWallet(),
+      new InfinityWallet(),
+      new StoicWallet(),
+    ],
   });
 
   return (
@@ -28,6 +37,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/following" element={<Following />} />
               <Route path="/stream" element={<Stream />} />
+              <Route path="/profiles/:principalId" element={<Profiles />} />
             </Routes>
           </SocketProvider>
         </ToastProvider>
