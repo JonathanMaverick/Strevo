@@ -14,8 +14,7 @@ export default function Navbar() {
     principal,
     user,
     handleLogin,
-    handleRegister,
-    userLoading,
+    handleRegister
   } = useUserAuth();
 
   useEffect(() => {
@@ -52,29 +51,6 @@ export default function Navbar() {
             <User className="h-4 w-4 text-sky-400" />
             <span className="text-sm text-white/90">{user.username}</span>
           </div>
-          <button
-            onClick={disconnect}
-            className="text-sm text-white/60 hover:text-white/80"
-          >
-            Disconnect
-          </button>
-        </div>
-      );
-    }
-
-    if (userLoading) {
-      return (
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-white/60">
-            Wallet: {principal?.slice(0, 8)}...{principal?.slice(-4)}
-          </span>
-          <button
-            onClick={() => setShowRegisterModal(true)}
-            className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
-          >
-            <UserPlus className="h-4 w-4" />
-            Loading...
-          </button>
           <button
             onClick={disconnect}
             className="text-sm text-white/60 hover:text-white/80"
