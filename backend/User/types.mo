@@ -3,7 +3,8 @@ module {
         principal_id : Text;
         username : Text;
         profile_picture : Text;
-        created_at : Int 
+        created_at : Int;
+        streaming_key: Text;
     };
 
     public type Following = {

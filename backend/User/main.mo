@@ -31,6 +31,7 @@ persistent actor Main {
                     username = userData.username;
                     profile_picture = userData.profile_picture;
                     created_at = Time.now(); 
+                    streaming_key = userData.streaming_key;
                 };
                 tree.put(principal_id, newUser);
                 #ok(userData)
@@ -190,6 +191,15 @@ persistent actor Main {
         let entries = tree.entries();
         let entriesArray = Iter.toArray(entries);
         Array.map<(Text, User.User), User.User>(entriesArray, func((_, user)) { user })
+    };
+
+    public func getUserByStreamingKey(streaming_key: Text) : async Result.Result<User.User, Text> {
+        for ((principal_id, user) in tree.entries()) {
+            if (user.streaming_key == streaming_key) {
+                return #ok(user);
+            };
+        };
+        #err("User not found with streaming key")
     };
 
 }
