@@ -29,6 +29,14 @@ export function useUserAuth() {
   } = useUpdateCall({
     functionName: 'register',
     onSuccess: (result) => {
+      console.log(result);
+
+      const typedResult = result as { err?: string };
+      if (typedResult?.err) {
+        console.error('Registration failed:', typedResult.err);
+        return;
+      }
+
       console.log('User registered successfully:', result);
       fetchUser([principal || '']);
     },
@@ -59,7 +67,7 @@ export function useUserAuth() {
 
     const userData = {
       ...registrationData,
-      createdAt: new Date().toISOString(),
+      created_at : 1
     };
 
     await registerUser([principal, userData]);
