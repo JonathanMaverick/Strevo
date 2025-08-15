@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   PlayCircle,
@@ -9,48 +9,73 @@ import {
   Users,
   Calendar,
   Clock,
-  Settings,
+  Settings as SettingsIcon,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useUserProfile } from '../services/userProfileService';
 
 export default function Profile() {
-
+  const { user, stats, isConnected, currentUserPrincipal, loadOwnProfile } =
+    useUserProfile();
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
-  const stats = [
-    { label: 'Followers', value: '340K', icon: Users },
-    { label: 'Subscribers', value: '12.8K', icon: Crown },
-    { label: 'Live Avg', value: '9.4K', icon: PlayCircle },
+  useEffect(() => {
+    if (isConnected && currentUserPrincipal) loadOwnProfile();
+  }, [isConnected, currentUserPrincipal, loadOwnProfile]);
+
+  const displayName = user?.username || 'Your Name';
+  const avatarUrl =
+    user?.profile_picture ||
+    `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((displayName?.[0] || 'U').toUpperCase()))}`;
+  const followersVal =
+    typeof stats?.followersCount === 'number'
+      ? stats.followersCount >= 1000
+        ? `${(stats.followersCount / 1000).toFixed(1)}K`
+        : `${stats.followersCount}`
+      : '—';
+
+  const followersHref = currentUserPrincipal
+    ? `/profile/${currentUserPrincipal}/followers`
+    : `/followers`;
+
+  const statsCards = [
+    {
+      label: 'Followers',
+      value: followersVal,
+      icon: Users,
+      href: followersHref,
+    },
+    { label: 'Subscribers', value: '—', icon: Crown },
+    { label: 'Live Avg', value: '—', icon: PlayCircle },
   ];
 
   const videos = Array.from({ length: 8 }).map((_, i) => ({
-    title: `Scrim VOD #${i + 1} — Immortal grind`,
-    views: `${(Math.random() * 200 + 50).toFixed(1)}K`,
-    length: `${Math.floor(Math.random() * 2) + 1}h ${Math.floor(Math.random() * 59)}m`,
-    tag: i % 3 === 0 ? 'FPS' : i % 3 === 1 ? 'Ranked' : 'Coaching',
+    title: `Video #${i + 1}`,
+    views: '—',
+    length: '—',
+    tag: ['FPS', 'Ranked', 'Coaching'][i % 3],
     color: 'from-slate-700 via-slate-800 to-black',
   }));
 
   const clips = Array.from({ length: 6 }).map((_, i) => ({
-    title: `Nasty flick on Bind #${i + 1}`,
-    views: `${(Math.random() * 900 + 100).toFixed(0)}K`,
-    length: `0:${Math.floor(Math.random() * 59)
-      .toString()
-      .padStart(2, '0')}`,
+    title: `Clip #${i + 1}`,
+    views: '—',
+    length: `0:${String((i * 7) % 59).padStart(2, '0')}`,
     color: 'from-slate-700 via-slate-800 to-black',
   }));
 
   const schedule = [
-    { day: 'Mon', time: '19:00–23:00 WIB', note: 'Ranked grind' },
-    { day: 'Tue', time: '19:00–23:00 WIB', note: 'Scrims + review' },
-    { day: 'Wed', time: 'Off', note: '—' },
-    { day: 'Thu', time: '19:00–23:00 WIB', note: 'Coaching live' },
-    { day: 'Fri', time: '20:00–24:00 WIB', note: 'Community games' },
-    { day: 'Sat', time: 'Variable', note: 'Tournament days' },
-    { day: 'Sun', time: '18:00–22:00 WIB', note: 'Variety' },
+    { day: 'Mon', time: '—', note: '—' },
+    { day: 'Tue', time: '—', note: '—' },
+    { day: 'Wed', time: '—', note: '—' },
+    { day: 'Thu', time: '—', note: '—' },
+    { day: 'Fri', time: '—', note: '—' },
+    { day: 'Sat', time: '—', note: '—' },
+    { day: 'Sun', time: '—', note: '—' },
   ];
 
   return (
@@ -76,18 +101,16 @@ export default function Profile() {
             <div className="-mt-10 flex items-end gap-4 z-[100]">
               <img
                 alt="avatar"
-                src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
-                className="h-20 w-20 rounded-2xl ring-2 ring-white/10"
+                src={avatarUrl}
+                className="h-20 w-20 rounded-2xl ring-2 ring-white/10 object-cover"
               />
               <div className="flex-1">
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between">
                   <div>
                     <h1 className="text-xl font-semibold leading-tight">
-                      NovaSpectre
+                      {displayName}
                     </h1>
-                    <p className="mt-1 text-sm text-white/70">
-                      FPS • Competitive • Coaching
-                    </p>
+                    <p className="mt-1 text-sm text-white/70">—</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2 sm:mt-0">
                     <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
@@ -113,32 +136,43 @@ export default function Profile() {
                     >
                       <Share2 className="h-4 w-4" />
                     </button>
-                    <button
+                    <Link
+                      to="/settings"
                       className="rounded-xl border border-white/10 p-2 hover:border-white/20"
                       aria-label="Settings"
                     >
-                      <Settings className="h-4 w-4" />
-                    </button>
+                      <SettingsIcon className="h-4 w-4" />
+                    </Link>
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-2 grid gap-3 sm:grid-cols-3">
-              {stats.map((s, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3"
-                >
-                  <s.icon className="h-4 w-4 text-white/80" />
-                  <div>
-                    <div className="text-sm font-semibold">{s.value}</div>
-                    <div className="text-[11px] uppercase tracking-wide text-white/60">
-                      {s.label}
+              {statsCards.map((s, i) => {
+                const Card = (
+                  <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3">
+                    <s.icon className="h-4 w-4 text-white/80" />
+                    <div>
+                      <div className="text-sm font-semibold">{s.value}</div>
+                      <div className="text-[11px] uppercase tracking-wide text-white/60">
+                        {s.label}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+                return s.label === 'Followers' ? (
+                  <Link
+                    key={i}
+                    to={s.href!}
+                    className="block hover:bg-white/[0.04] rounded-xl"
+                  >
+                    {Card}
+                  </Link>
+                ) : (
+                  <div key={i}>{Card}</div>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -153,7 +187,7 @@ export default function Profile() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="text-sm font-semibold">Featured</div>
-                <div className="text-[10px] text-white/60">1080p • 60fps</div>
+                <div className="text:[10px] text-white/60">—</div>
               </div>
               <div className="aspect-video w-full overflow-hidden bg-gradient-to-br from-slate-700 via-slate-800 to-black">
                 <div className="flex h-full items-center justify-center">
@@ -165,10 +199,8 @@ export default function Profile() {
               </div>
               <div className="flex items-center justify-between px-4 py-3">
                 <div>
-                  <p className="text-sm font-semibold">
-                    Pro scrims — finals practice
-                  </p>
-                  <p className="text-xs text-white/60">12.4K watching • FPS</p>
+                  <p className="text-sm font-semibold">—</p>
+                  <p className="text-xs text-white/60">—</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
@@ -266,26 +298,17 @@ export default function Profile() {
                 {activeTab === 'about' && (
                   <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                     <p className="text-sm text-white/80">
-                      Hi, I’m <span className="font-semibold">NovaSpectre</span>{' '}
-                      — competitive FPS player focused on improvement and
-                      coaching. I stream scrims, ranked climbs, and VOD reviews.
-                      Business:{' '}
-                      <span className="text-white/90">
-                        contact@novaspectre.gg
-                      </span>
+                      Hi, I’m{' '}
+                      <span className="font-semibold">{displayName}</span> — —
                     </p>
                     <div className="mt-4 grid gap-3 sm:grid-cols-2">
                       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                         <div className="text-xs text-white/60">Gear</div>
-                        <div className="mt-1 text-sm">
-                          XM27 Pro • Sense 0.45 • 800 DPI
-                        </div>
+                        <div className="mt-1 text-sm">—</div>
                       </div>
                       <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3">
                         <div className="text-xs text-white/60">PC Specs</div>
-                        <div className="mt-1 text-sm">
-                          7800X3D • 4070 Ti • 32GB
-                        </div>
+                        <div className="mt-1 text-sm">—</div>
                       </div>
                     </div>
                   </div>
