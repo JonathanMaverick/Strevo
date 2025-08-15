@@ -23,6 +23,13 @@ export default function Navbar() {
     }
   }, [isConnected, principal, handleLogin]);
 
+  function generateStreamingKey() {
+    return [...crypto.getRandomValues(new Uint8Array(8))]
+      .map(b => b.toString(36).padStart(2, '0'))
+      .join('')
+      .slice(0, 8);
+  }
+
   const handleRegisterSubmit = async (formData: FormData) => {
     const username = formData.get('username') as string;
     const profile_picture = formData.get('profile_picture') as string;
@@ -32,6 +39,7 @@ export default function Navbar() {
         principal_id: principal,
         username,
         profile_picture,
+        streamingKey: generateStreamingKey()
       });
       setShowRegisterModal(false);
     } catch (error) {
