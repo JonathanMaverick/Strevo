@@ -62,12 +62,20 @@ export function useUserAuth() {
     return result.err;
   };
 
+  function generateStreamingKey() {
+    return [...crypto.getRandomValues(new Uint8Array(8))]
+      .map((b) => b.toString(36).padStart(2, '0'))
+      .join('')
+      .slice(0, 8);
+  }
+
   const handleRegister = async (registrationData: UserRegistrationData) => {
     if (!principal) throw new Error('Wallet not connected');
 
     const userData = {
       ...registrationData,
-      created_at : 1
+      created_at: 1,
+      streaming_key: generateStreamingKey(),
     };
 
     await registerUser([principal, userData]);

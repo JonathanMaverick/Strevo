@@ -1,7 +1,7 @@
 import { useQueryCall, useUpdateCall } from '@ic-reactor/react';
 import { useConnect } from '@connect2ic/react';
 import { User } from '../interfaces/user';
-import { Following } from '../interfaces/following';
+import { Followers, Following } from '../interfaces/following';
 import {
   isErrResult,
   isOkResult,
@@ -20,6 +20,17 @@ export function useFollowing() {
     call: fetchFollowing,
   } = useQueryCall({
     functionName: 'getAllFollowing',
+    args: [principal || ''],
+    refetchOnMount: false,
+  });
+
+  const {
+    data: followersData,
+    loading: followersLoading,
+    error: followersError,
+    call: fetchFollowers,
+  } = useQueryCall({
+    functionName: 'getAllFollowers',
     args: [principal || ''],
     refetchOnMount: false,
   });
@@ -54,17 +65,6 @@ export function useFollowing() {
   } = useQueryCall({
     functionName: 'isFollowing',
     args: [principal || '', selectedUser || ''],
-    refetchOnMount: false,
-  });
-
-  const {
-    data: allUsersData,
-    loading: allUsersLoading,
-    error: allUsersError,
-    call: fetchAllUsers,
-  } = useQueryCall({
-    functionName: 'getAllUsers',
-    args: [],
     refetchOnMount: false,
   });
 
@@ -120,6 +120,15 @@ export function useFollowing() {
     return result.ok;
   };
 
+  const getFollowersList = (): Followers[] => {
+    const result = followersData as
+      | MotokoResult<Followers[], string>
+      | null
+      | undefined;
+    if (!isOkResult(result)) return [];
+    return result.ok;
+  };
+
   const getFollowersCount = (): number => {
     const result = followersCountData as
       | MotokoResult<bigint, string>
@@ -145,11 +154,6 @@ export function useFollowing() {
       | undefined;
     if (!isOkResult(result)) return false;
     return result.ok;
-  };
-
-  const getAllUsers = (): User[] => {
-    const result = allUsersData as User[] | null | undefined;
-    return result || [];
   };
 
   const getFollowError = (): string | null => {
@@ -236,35 +240,28 @@ export function useFollowing() {
     checkIsFollowing,
   ]);
 
-  const refetchAllData = useCallback(() => {
-    refetchFollowingData();
-    fetchAllUsers([]);
-  }, [refetchFollowingData, fetchAllUsers]);
+  const refetchFollowersData = useCallback(() => {
+    if (!principal) return;
+
+    fetchFollowers([principal]);
+    fetchFollowersCount([principal]);
+
+    if (selectedUser) {
+      fetchFollowingCount([selectedUser]);
+      checkIsFollowing([selectedUser, principal]);
+    }
+  }, [
+    principal,
+    selectedUser,
+    fetchFollowers,
+    fetchFollowingCount,
+    fetchFollowersCount,
+    checkIsFollowing,
+  ]);
 
   const getFollowingUsers = (): User[] => {
     const followingList = getFollowingList();
     return followingList.map((following) => following.following);
-  };
-
-  const getNonFollowingUsers = (): User[] => {
-    if (!principal) return [];
-
-    const allUsers = getAllUsers();
-    const followingList = getFollowingList();
-    const followingPrincipals = followingList.map(
-      (f) => f.following.principal_id,
-    );
-
-    return allUsers.filter(
-      (user) =>
-        user.principal_id !== principal && 
-        !followingPrincipals.includes(user.principal_id), 
-    );
-  };
-
-  const getSuggestedUsers = async (): Promise<User[]> => {
-    const nonFollowing = getNonFollowingUsers();
-    return nonFollowing.slice(0, 5);
   };
 
   return {
@@ -272,26 +269,25 @@ export function useFollowing() {
     principal,
 
     followingList: getFollowingList(),
+    followersList: getFollowersList(),
     followingUsers: getFollowingUsers(),
     followingCount: getFollowingCount(),
     followersCount: getFollowersCount(),
     isFollowing: getIsFollowing(),
-    allUsers: getAllUsers(),
-    nonFollowingUsers: getNonFollowingUsers(),
 
     followingLoading,
+    followersLoading,
     followersCountLoading,
     followingCountLoading,
     isFollowingLoading,
-    allUsersLoading,
     followLoading,
     unfollowLoading,
 
     followingError,
+    followersError,
     followersCountError,
     followingCountError,
     isFollowingError,
-    allUsersError,
     followError: getFollowError(),
     unfollowError: getUnfollowError(),
 
@@ -301,11 +297,9 @@ export function useFollowing() {
     checkFollowingStatus,
     getUserFollowersCount,
     getUserFollowingCount,
-    getSuggestedUsers,
 
     refetchFollowingData,
-    refetchAllData,
-    refetchAllUsers: () => fetchAllUsers([]),
+    refetchFollowersData,
 
     selectedUser,
     setSelectedUser,

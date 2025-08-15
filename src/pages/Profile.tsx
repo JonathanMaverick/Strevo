@@ -15,6 +15,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 export default function Profile() {
+
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
