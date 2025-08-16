@@ -6,8 +6,34 @@ import {
   isOkResult,
   MotokoResult,
 } from '../interfaces/motoko-result';
+import React, {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+} from 'react';
 
-export function useUserAuth() {
+export interface AuthContextType {
+  isConnected: boolean;
+  principal: string | null | undefined;
+  user: User | null;
+  userLoading: boolean;
+  registerLoading: boolean;
+  userError: any;
+  registerError: string | null;
+  handleLogin: () => Promise<void>;
+  handleRegister: (data: UserRegistrationData) => Promise<void>;
+  refetchUser: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(
+  undefined
+);
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const { isConnected, principal } = useConnect();
 
   const {
@@ -24,20 +50,15 @@ export function useUserAuth() {
   const {
     data: registerResult,
     loading: registerLoading,
-    error: registerError,
     call: registerUser,
   } = useUpdateCall({
     functionName: 'register',
     onSuccess: (result) => {
-      console.log(result);
-
       const typedResult = result as { err?: string };
       if (typedResult?.err) {
         console.error('Registration failed:', typedResult.err);
         return;
       }
-
-      console.log('User registered successfully:', result);
       fetchUser([principal || '']);
     },
     onError: (error) => {
@@ -47,7 +68,6 @@ export function useUserAuth() {
 
   const getUserData = (): User | null => {
     const result = userData as MotokoResult<User, string> | null | undefined;
-
     if (!isOkResult(result)) return null;
     return result.ok;
   };
@@ -57,7 +77,6 @@ export function useUserAuth() {
       | MotokoResult<User, string>
       | null
       | undefined;
-
     if (!isErrResult(result)) return null;
     return result.err;
   };
@@ -71,15 +90,12 @@ export function useUserAuth() {
 
   const handleRegister = async (registrationData: UserRegistrationData) => {
     if (!principal) throw new Error('Wallet not connected');
-
     const userData = {
       ...registrationData,
       created_at: 1,
       streaming_key: generateStreamingKey(),
     };
-
     await registerUser([principal, userData]);
-    await fetchUser([principal]);
   };
 
   const handleLogin = async () => {
@@ -87,19 +103,52 @@ export function useUserAuth() {
     await fetchUser([principal]);
   };
 
-  return {
-    isConnected,
-    principal,
-    user: getUserData(),
+  useEffect(() => {
+    if (principal && isConnected) {
+      fetchUser([principal]);
+    }
+  }, [principal, isConnected, fetchUser]);
 
-    userLoading,
-    registerLoading,
+  const contextValue = useMemo<AuthContextType>(
+    () => ({
+      isConnected,
+      principal,
+      user: getUserData(),
+      userLoading,
+      registerLoading,
+      userError,
+      registerError: getRegisterError(),
+      handleLogin,
+      handleRegister,
+      refetchUser: () => fetchUser([principal || '']),
+    }),
+    [
+      isConnected,
+      principal,
+      userData,
+      userLoading,
+      registerLoading,
+      userError,
+      registerResult,
+      fetchUser,
+    ]
+  );
 
-    userError,
-    registerError,
+  return (
+    <AuthContext.Provider value={contextValue}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
 
-    handleLogin,
-    handleRegister,
-    refetchUser: () => fetchUser([principal || '']),
-  };
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useUserAuth must be used within a UserAuthProvider');
+  }
+  return context;
+}
+
+export function useAuthOptional(): AuthContextType | null {
+  return useContext(AuthContext) || null;
 }

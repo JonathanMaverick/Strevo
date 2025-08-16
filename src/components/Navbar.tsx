@@ -8,27 +8,47 @@ import {
   Settings,
   LogOut,
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ConnectButton, ConnectDialog, useConnect } from '@connect2ic/react';
-import { useUserAuth } from '../services/userAuthService';
 import RegisterModal from '../components/RegisterModal';
+import { useAuth } from '../contexts/auth.context';
 
 export default function Navbar() {
   const { disconnect } = useConnect();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const { isConnected, principal, user, handleLogin, handleRegister } =
-    useUserAuth();
+  const { isConnected, principal, user, handleLogin, handleRegister, userLoading } = useAuth(); 
+
+  const stableHandleLogin = useCallback(async () => {
+    if (!isConnected || !principal || userLoading || hasAttemptedLogin) return;
+    
+    try {
+      setHasAttemptedLogin(true);
+      await handleLogin();
+    } catch (error) {
+      console.error('Login failed:', error);
+      setHasAttemptedLogin(false);
+    }
+  }, [isConnected, principal, handleLogin, userLoading, hasAttemptedLogin]);
 
   useEffect(() => {
-    if (isConnected && principal) handleLogin();
-  }, [isConnected, principal, handleLogin]);
+    if (!isConnected || !principal) {
+      setHasAttemptedLogin(false);
+    }
+  }, [isConnected, principal]);
+
+  useEffect(() => {
+    if (isConnected && principal && !user && !userLoading && !hasAttemptedLogin) {
+      stableHandleLogin();
+    }
+  }, [isConnected, principal, user, userLoading, hasAttemptedLogin, stableHandleLogin]);
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
@@ -56,11 +76,13 @@ export default function Navbar() {
     username: string;
     profile_picture: string;
   }) => {
-    await handleRegister({
-      principal_id: principal,
-      username,
-      profile_picture,
-    });
+    if (principal) {
+      await handleRegister({
+        principal_id: principal,
+        username,
+        profile_picture,
+      });
+    }
   };
 
   const ProfileDropdown = () => {

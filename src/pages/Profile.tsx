@@ -15,16 +15,16 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
+import { useAuth } from '../contexts/auth.context';
 
 export default function Profile() {
-  const { user, stats, isConnected, currentUserPrincipal, loadOwnProfile } =
-    useUserProfile();
+  const {user} = useAuth();
+  const {stats} = useUserProfile(user?.principal_id)
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
   useEffect(() => {
-    loadOwnProfile();
     console.log(user)
   }, []);
 
@@ -39,8 +39,8 @@ export default function Profile() {
         : `${stats.followersCount}`
       : '—';
 
-  const followersHref = currentUserPrincipal
-    ? `/profile/${currentUserPrincipal}/followers`
+  const followersHref =user?.principal_id 
+    ? `/profile/${user.principal_id}/followers`
     : `/followers`;
 
   const statsCards = [

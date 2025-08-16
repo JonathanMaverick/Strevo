@@ -17,6 +17,7 @@ import { SocketProvider } from './contexts/socket.context';
 import { ToastProvider } from './contexts/toast.context';
 import Settings from './pages/Settings';
 import Followers from './pages/Followers';
+import { AuthProvider } from './contexts/auth.context';
 
 function App() {
   const client = createClient({
@@ -32,6 +33,7 @@ function App() {
     <BrowserRouter>
       <Connect2ICProvider client={client}>
         <ToastProvider>
+          <AuthProvider>
           <SocketProvider>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -42,9 +44,10 @@ function App() {
               <Route
                 path="/profile/:principalId/followers"
                 element={<Followers />}
-              />
+                />
             </Routes>
           </SocketProvider>
+          </AuthProvider>
         </ToastProvider>
       </Connect2ICProvider>
     </BrowserRouter>
