@@ -24,8 +24,9 @@ export default function Profile() {
   >('videos');
 
   useEffect(() => {
-    if (isConnected && currentUserPrincipal) loadOwnProfile();
-  }, [isConnected, currentUserPrincipal, loadOwnProfile]);
+    loadOwnProfile();
+    console.log(user)
+  }, []);
 
   const displayName = user?.username || 'Your Name';
   const avatarUrl =

@@ -15,7 +15,6 @@ import { StoicWallet } from '@connect2ic/core/providers/stoic-wallet';
 import { Connect2ICProvider } from '@connect2ic/react';
 import { SocketProvider } from './contexts/socket.context';
 import { ToastProvider } from './contexts/toast.context';
-import Profiles from './components/Profiles';
 import Settings from './pages/Settings';
 import Followers from './pages/Followers';
 
@@ -40,7 +39,6 @@ function App() {
               <Route path="/following" element={<Following />} />
               <Route path="/stream" element={<Stream />} />
               <Route path="/settings" element={<Settings />} />
-              <Route path="/profiles/:principalId" element={<Profiles />} />
               <Route
                 path="/profile/:principalId/followers"
                 element={<Followers />}
