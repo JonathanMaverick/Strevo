@@ -164,7 +164,6 @@ export function useUserProfile(targetPrincipal?: string) {
 
   const loadProfile = useCallback(
     async (userPrincipal: string) => {
-      setProfilePrincipal(userPrincipal);
 
       await Promise.all([
         fetchUser([userPrincipal]),
