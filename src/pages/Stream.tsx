@@ -174,7 +174,7 @@ export default function Stream() {
     const video = videoRef.current;
     if (!video || !user?.streaming_key) return;
 
-    const streamURL = `${process.env.VITE_STREAMING_SERVER_URL}/live/${user.streaming_key}/index.m3u8`;
+    const streamURL = `${process.env.VITE_STREAMING_SERVER_URL}/watch/${user.principal_id}/index.m3u8`;
     
     if (hlsRef.current) {
       hlsRef.current.destroy();
