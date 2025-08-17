@@ -125,7 +125,7 @@ persistent actor Main {
                         let followingArray = Buffer.toArray(followingList);
                         let result = Array.map<User.User, User.Following>(followingArray, func(user) {
                             {
-                                principal_id = userPrincipal;
+                                principal_id = user.principal_id;
                                 following = user;
                             }
                         });
@@ -136,7 +136,7 @@ persistent actor Main {
         };
     };
 
-    public func getAllFollowers(userPrincipal: Text) : async Result.Result<[User.Following], Text> {
+    public func getAllFollowers(userPrincipal: Text) : async Result.Result<[User.Followers], Text> {
         switch(tree.get(userPrincipal)) {
             case null { #err("User not found") };
             case (?_) {
@@ -163,10 +163,10 @@ persistent actor Main {
                 };
                 
                 let followersArray = Buffer.toArray(followersBuffer);
-                let result = Array.map<User.User, User.Following>(followersArray, func(user) {
+                let result = Array.map<User.User, User.Followers>(followersArray, func(user) {
                     {
-                        principal_id = userPrincipal;
-                        following = user;
+                        principal_id = user.principal_id;
+                        followers = user;
                     }
                 });
                 

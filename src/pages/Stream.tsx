@@ -29,15 +29,12 @@ import Footer from '../components/Footer';
 import { useNavigate, useParams } from "react-router-dom";
 import { useUserProfile } from "../services/userProfileService";
 import { useFollowing } from "../services/followService";
-import { User } from "../interfaces/user";
-import { useUserAuth } from "../services/userAuthService";
-import { principal } from "@ic-reactor/react/dist/utils";
 import { ChatMessage } from "../interfaces/chat-message";
 import { SocketMessage } from "../interfaces/socket-message";
 import { SocketMessageType } from "../enums/socket-message-type";
 import Hls from "hls.js"
+import { useAuth } from '../contexts/auth.context';
 
-// Video quality options
 const QUALITY_OPTIONS = [
   { label: '1080p', value: '1080p' },
   { label: '720p', value: '720p' },
@@ -48,10 +45,9 @@ const QUALITY_OPTIONS = [
 export default function Stream() {
   const { principalId } = useParams();
   const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(principalId);
-  const { user: currentUser, refetchUser } = useUserAuth();
+  const { user: currentUser, userLoading } = useAuth();
   const { handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
   
-  // Video state
   const [isFollowing, setIsFollowing] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [muted, setMuted] = useState(true);
@@ -67,7 +63,6 @@ export default function Stream() {
   const [currentQuality, setCurrentQuality] = useState('auto');
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   
-  // UI state
   const [showChat, setShowChat] = useState(true);
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -81,7 +76,6 @@ export default function Stream() {
   const hlsRef = useRef<Hls | null>(null);
   const controlsTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Auto-hide controls after 3 seconds of inactivity
   const resetControlsTimeout = useCallback(() => {
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -94,7 +88,6 @@ export default function Stream() {
     }, 3000);
   }, [playing]);
 
-  // Video event handlers
   const handleVideoEvents = useCallback(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -103,7 +96,6 @@ export default function Stream() {
       setCurrentTime(video.currentTime);
       setDuration(video.duration || 0);
       
-      // Update buffered progress
       if (video.buffered.length > 0) {
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
         setBuffered((bufferedEnd / video.duration) * 100 || 0);
@@ -119,7 +111,6 @@ export default function Stream() {
       setIsLoading(false);
       setVideoError(null);
       
-      // Auto-play with error handling
       video.play()
         .then(() => {
           setPlaying(true);
@@ -169,7 +160,6 @@ export default function Stream() {
     };
   }, []);
 
-  // HLS setup
   const setupHLS = useCallback(() => {
     const video = videoRef.current;
     if (!video || !user?.streaming_key) return;
@@ -220,14 +210,12 @@ export default function Stream() {
       });
 
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari native HLS support
       video.src = streamURL;
     } else {
       setVideoError('Your browser does not support HLS streaming.');
     }
   }, [user?.streaming_key]);
 
-  // Control handlers
   const togglePlay = () => {
     const video = videoRef.current;
     if (!video) return;
@@ -316,11 +304,10 @@ export default function Stream() {
       navigate(-1);
       return;
     }
+    console.log(principalId)
     loadProfile(principalId);
-    checkFollowingStatus(principalId).then(isFollowing => setIsFollowing(isFollowing));
-    refetchUser();
+    checkFollowingStatus(principalId).then(isFollowing => {setIsFollowing(isFollowing); console.log('isFollowing', isFollowing)});
 
-    // Setup WebSocket
     socketRef.current = new WebSocket(`ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/aasd`);
     socketRef.current.onmessage = (event) => {
       const message: SocketMessage<ChatMessage> = JSON.parse(event.data);

@@ -14,10 +14,8 @@ export default function Settings() {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
   const {
     user,
-    loadOwnProfile,
     refreshProfile,
     isConnected,
-    currentUserPrincipal,
   } = useUserProfile();
 
   const [displayName, setDisplayName] = useState('');
@@ -31,10 +29,6 @@ export default function Settings() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (isConnected && currentUserPrincipal) loadOwnProfile();
-  }, [isConnected, currentUserPrincipal, loadOwnProfile]);
 
   useEffect(() => {
     if (!user) return;

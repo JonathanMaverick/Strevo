@@ -15,17 +15,29 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
+import { useAuth } from '../contexts/auth.context';
+import Loading from './Loading';
 
 export default function Profile() {
-  const { user, stats, isConnected, currentUserPrincipal, loadOwnProfile } =
-    useUserProfile();
+  const {user, userLoading} = useAuth();
+  const {stats} = useUserProfile(user?.principal_id)
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
-  useEffect(() => {
-    if (isConnected && currentUserPrincipal) loadOwnProfile();
-  }, [isConnected, currentUserPrincipal, loadOwnProfile]);
+  if (userLoading) {
+    return (
+      <Loading />
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-black">
+        Please login to view profile
+      </div>
+    );
+  }
 
   const displayName = user?.username || 'Your Name';
   const avatarUrl =
@@ -38,8 +50,8 @@ export default function Profile() {
         : `${stats.followersCount}`
       : '—';
 
-  const followersHref = currentUserPrincipal
-    ? `/profile/${currentUserPrincipal}/followers`
+  const followersHref =user?.principal_id 
+    ? `/profile/${user.principal_id}/followers`
     : `/followers`;
 
   const statsCards = [
