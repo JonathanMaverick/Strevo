@@ -1,7 +1,7 @@
 import { useQueryCall, useUpdateCall } from '@ic-reactor/react';
 import { useConnect } from '@connect2ic/react';
 import { User } from '../interfaces/user';
-import { Followers, Following } from '../interfaces/following';
+import { FollowersInterface, FollowingInterface } from '../interfaces/following';
 import {
   isErrResult,
   isOkResult,
@@ -112,18 +112,18 @@ export function useFollowing() {
     },
   });
 
-  const getFollowingList = (): Following[] => {
+  const getFollowingList = (): FollowingInterface[] => {
     const result = followingData as
-      | MotokoResult<Following[], string>
+      | MotokoResult<FollowingInterface[], string>
       | null
       | undefined;
     if (!isOkResult(result)) return [];
     return result.ok;
   };
 
-  const getFollowersList = (): Followers[] => {
+  const getFollowersList = (): FollowersInterface[] => {
     const result = followersData as
-      | MotokoResult<Followers[], string>
+      | MotokoResult<FollowersInterface[], string>
       | null
       | undefined;
     if (!isOkResult(result)) return [];

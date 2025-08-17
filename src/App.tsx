@@ -41,7 +41,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/following" element={<Following />} />
               <Route path="/stream/:principalId" element={<Stream />} />
-              <Route path="/stream-ex/:principalId" element={<StreamExample />} />
+              <Route path="/stream-ex/:streamerId" element={<StreamExample />} />
               <Route path="/settings" element={<Settings />} />
               <Route
                 path="/profile/:principalId/followers"
