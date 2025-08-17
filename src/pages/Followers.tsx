@@ -5,8 +5,9 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Users, ArrowLeft } from 'lucide-react';
 import { useUserProfile } from '../services/userProfileService';
+import { FollowersInterface } from '../interfaces/following';
 
-export default function Followers() {
+export default function FollowersPage() {
   const { principalId } = useParams();
   const navigate = useNavigate();
   const {
@@ -14,23 +15,12 @@ export default function Followers() {
     stats,
     followersList,
     isLoading,
-    followersListLoading,
-    loadOwnProfile,
     loadProfile,
-    isConnected,
-    currentUserPrincipal,
   } = useUserProfile(principalId);
 
   useEffect(() => {
     if (principalId) loadProfile(principalId);
-    else if (isConnected && currentUserPrincipal) loadOwnProfile();
-  }, [
-    principalId,
-    isConnected,
-    currentUserPrincipal,
-    loadOwnProfile,
-    loadProfile,
-  ]);
+  }, [principalId]);
 
   const targetName = user?.username || 'User';
   const count =
@@ -38,25 +28,23 @@ export default function Followers() {
 
   const items = Array.isArray(followersList) ? followersList : [];
 
-  const renderAvatar = (u: any) => {
+  const renderAvatar = (u: FollowersInterface) => {
     const url =
-      u?.profile_picture ||
-      `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((u?.username?.[0] || 'U').toUpperCase()))}`;
+      u?.followers.profile_picture ||
+      `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((u?.followers.username || 'U').toUpperCase()))}`;
     return (
       <img
         src={url}
-        alt={u?.username || 'avatar'}
+        alt={u?.followers.username || 'avatar'}
         className="h-10 w-10 rounded-full ring-2 ring-white/10 object-cover"
       />
     );
   };
 
-  const getPrincipal = (u: any) =>
-    u?.principal_id || u?.principal || u?.id || '';
-  const getName = (u: any) =>
-    u?.username || (getPrincipal(u) ? shortPrincipal(getPrincipal(u)) : '—');
-
-  const loading = isLoading || followersListLoading;
+  const getPrincipal = (u: FollowersInterface) =>
+    u.principal_id;
+  const getName = (u: FollowersInterface) =>
+    u?.followers.username; 
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">
@@ -149,7 +137,7 @@ export default function Followers() {
           </div>
 
           <div className="divide-y divide-white/5">
-            {loading && (
+            {isLoading && (
               <div className="px-5 py-6">
                 <div className="grid gap-3">
                   {Array.from({ length: 6 }).map((_, i) => (
@@ -166,13 +154,13 @@ export default function Followers() {
               </div>
             )}
 
-            {!loading && items.length === 0 && (
+            {!isLoading && items.length === 0 && (
               <div className="px-5 py-10 text-center text-sm text-white/70">
                 No followers yet.
               </div>
             )}
 
-            {!loading &&
+            {!isLoading &&
               items.map((u: any, idx: number) => {
                 const p = getPrincipal(u);
                 const name = getName(u);

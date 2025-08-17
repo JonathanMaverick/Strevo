@@ -18,6 +18,7 @@ import { ToastProvider } from './contexts/toast.context';
 import Settings from './pages/Settings';
 import Followers from './pages/Followers';
 import { AuthProvider } from './contexts/auth.context';
+import StreamExample from './pages/stream-example';
 
 function App() {
   const client = createClient({
@@ -40,6 +41,7 @@ function App() {
               <Route path="/profile" element={<Profile />} />
               <Route path="/following" element={<Following />} />
               <Route path="/stream/:principalId" element={<Stream />} />
+              <Route path="/stream-ex/:principalId" element={<StreamExample />} />
               <Route path="/settings" element={<Settings />} />
               <Route
                 path="/profile/:principalId/followers"

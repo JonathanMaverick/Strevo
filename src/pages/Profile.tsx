@@ -16,17 +16,28 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
 import { useAuth } from '../contexts/auth.context';
+import Loading from './Loading';
 
 export default function Profile() {
-  const {user} = useAuth();
+  const {user, userLoading} = useAuth();
   const {stats} = useUserProfile(user?.principal_id)
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
-  useEffect(() => {
-    console.log(user)
-  }, []);
+  if (userLoading) {
+    return (
+      <Loading />
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-black">
+        Please login to view profile
+      </div>
+    );
+  }
 
   const displayName = user?.username || 'Your Name';
   const avatarUrl =
