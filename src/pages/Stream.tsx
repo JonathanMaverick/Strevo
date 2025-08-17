@@ -30,12 +30,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useUserProfile } from "../services/userProfileService";
 import { useFollowing } from "../services/followService";
 import { User } from "../interfaces/user";
-import { useUserAuth } from "../services/userAuthService";
 import { principal } from "@ic-reactor/react/dist/utils";
 import { ChatMessage } from "../interfaces/chat-message";
 import { SocketMessage } from "../interfaces/socket-message";
 import { SocketMessageType } from "../enums/socket-message-type";
 import Hls from "hls.js"
+import { useAuth } from '../contexts/auth.context';
 
 // Video quality options
 const QUALITY_OPTIONS = [
@@ -48,7 +48,7 @@ const QUALITY_OPTIONS = [
 export default function Stream() {
   const { principalId } = useParams();
   const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(principalId);
-  const { user: currentUser, refetchUser } = useUserAuth();
+  const { user: currentUser, refetchUser } = useAuth();
   const { handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
   
   // Video state
@@ -316,8 +316,9 @@ export default function Stream() {
       navigate(-1);
       return;
     }
+    console.log(principalId)
     loadProfile(principalId);
-    checkFollowingStatus(principalId).then(isFollowing => {console.log('is following?', isFollowing); setIsFollowing(isFollowing)});
+    checkFollowingStatus(principalId).then(isFollowing => {setIsFollowing(isFollowing); console.log('isFollowing', isFollowing)});
     refetchUser();
 
     // Setup WebSocket
