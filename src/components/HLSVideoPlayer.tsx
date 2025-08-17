@@ -1,0 +1,381 @@
+import Hls from "hls.js";
+import { AlertCircle, Loader2, Maximize2, Pause, Play, Volume2, VolumeX } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+
+export function HLSVideoPlayer({ url, setIsLive }: { url: string, setIsLive: (live: boolean) => void}) {
+    const hlsRef = useRef<Hls | null>(null);
+    const controlsTimeoutRef = useRef<NodeJS.Timeout>();
+    const [isLoading, setIsLoading] = useState(true);
+    const [playing, setPlaying] = useState(false);
+    const [muted, setMuted] = useState(true);
+    const [volume, setVolume] = useState(1);
+    const [previousVolume, setPreviousVolume] = useState(1);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [buffered, setBuffered] = useState(0);
+    const [showControls, setShowControls] = useState(true);
+    const videoRef = useRef<HTMLVideoElement>(null!);
+    const videoContainerRef = useRef<HTMLDivElement>(null!);
+    const [videoError, setVideoError] = useState<string | null>(null);
+    const [showQualityMenu, setShowQualityMenu] = useState(false);
+    const [currentQuality, setCurrentQuality] = useState('auto');
+    const [showVolumeSlider, setShowVolumeSlider] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const QUALITY_OPTIONS = [
+        { label: '1080p', value: '1080p' },
+        { label: '720p', value: '720p' },
+        { label: '480p', value: '480p' },
+        { label: 'Auto', value: 'auto' },
+    ];
+
+    const resetControlsTimeout = useCallback(() => {
+        if (controlsTimeoutRef.current) {
+            clearTimeout(controlsTimeoutRef.current);
+        }
+        setShowControls(true);
+        controlsTimeoutRef.current = setTimeout(() => {
+            if (playing) {
+                setShowControls(false);
+            }
+        }, 3000);
+    }, [playing]);
+
+    const handleVideoEvents = useCallback(() => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        const updateProgress = () => {
+            setCurrentTime(video.currentTime);
+            setDuration(video.duration || 0);
+
+            if (video.buffered.length > 0) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                setBuffered((bufferedEnd / video.duration) * 100 || 0);
+            }
+        };
+
+        const handleLoadStart = () => {
+            setIsLoading(true);
+            setVideoError(null);
+        };
+
+        const handleLoadedData = () => {
+            setIsLoading(false);
+            setVideoError(null);
+
+            video.play()
+                .then(() => {
+                    setPlaying(true);
+                    setIsLive(true);
+                })
+                .catch((error) => {
+                    console.log('Autoplay prevented:', error);
+                    setPlaying(false);
+                });
+        };
+
+        const handleError = () => {
+            setIsLoading(false);
+                    setIsLive(false);
+            setVideoError('Failed to load stream. Please try refreshing.');
+        };
+
+        const handleWaiting = () => setIsLoading(true);
+        const handlePlaying = () => {
+            setIsLoading(false);
+            setPlaying(true);
+        };
+        const handlePause = () => setPlaying(false);
+        const handleVolumeChange = () => {
+            setVolume(video.volume);
+            setMuted(video.muted);
+        };
+
+        video.addEventListener('timeupdate', updateProgress);
+        video.addEventListener('loadstart', handleLoadStart);
+        video.addEventListener('loadeddata', handleLoadedData);
+        video.addEventListener('error', handleError);
+        video.addEventListener('waiting', handleWaiting);
+        video.addEventListener('playing', handlePlaying);
+        video.addEventListener('pause', handlePause);
+        video.addEventListener('volu, principal, isConnectedmechange', handleVolumeChange);
+
+        return () => {
+            video.removeEventListener('timeupdate', updateProgress);
+            video.removeEventListener('loadstart', handleLoadStart);
+            video.removeEventListener('loadeddata', handleLoadedData);
+            video.removeEventListener('error', handleError);
+            video.removeEventListener('waiting', handleWaiting);
+            video.removeEventListener('playing', handlePlaying);
+            video.removeEventListener('pause', handlePause);
+            video.removeEventListener('volumechange', handleVolumeChange);
+        };
+    }, []);
+
+    const setupHLS = () => {
+        const video = videoRef.current;
+
+        if (hlsRef.current) {
+            hlsRef.current.destroy();
+        }
+
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+                backBufferLength: 90,
+                maxBufferLength: 30,
+                maxMaxBufferLength: 60,
+            });
+
+            hlsRef.current = hls;
+            hls.loadSource(url);
+            hls.attachMedia(video);
+
+            hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                console.log('HLS manifest parsed');
+                setVideoError(null);
+            });
+
+            hls.on(Hls.Events.ERROR, (event, data) => {
+                console.error('HLS error:', data);
+                if (data.fatal) {
+                    switch (data.type) {
+                        case Hls.ErrorTypes.NETWORK_ERROR:
+                            setVideoError('Network error. Please check your connection.');
+                            // Try to recover
+                            hls.startLoad();
+                            break;
+                        case Hls.ErrorTypes.MEDIA_ERROR:
+                            setVideoError('Media error. Attempting to recover...');
+                            hls.recoverMediaError();
+                            break;
+                        default:
+                            setVideoError('Stream error. Please refresh the page.');
+                            hls.destroy();
+                            break;
+                    }
+                }
+            });
+
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+        } else {
+            setVideoError('Your browser does not support HLS streaming.');
+        }
+    };
+
+    const togglePlay = () => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (playing) {
+            video.pause();
+        } else {
+            video.play().catch(() => {
+                setVideoError('Unable to play stream.');
+            });
+        }
+    };
+
+    const toggleMute = () => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        if (muted) {
+            video.muted = false;
+            video.volume = previousVolume;
+        } else {
+            setPreviousVolume(video.volume);
+            video.muted = true;
+        }
+    };
+
+    const handleVolumeChange = (newVolume: number) => {
+        const video = videoRef.current;
+        if (!video) return;
+
+        video.volume = newVolume;
+        video.muted = newVolume === 0;
+        if (newVolume > 0) {
+            setPreviousVolume(newVolume);
+        }
+    };
+
+    const toggleFullscreen = async () => {
+        if (!videoContainerRef.current) return;
+
+        try {
+            if (!document.fullscreenElement) {
+                await videoContainerRef.current.requestFullscreen();
+                setIsFullscreen(true);
+            } else {
+                await document.exitFullscreen();
+                setIsFullscreen(false);
+            }
+        } catch (error) {
+            console.error('Fullscreen error:', error);
+        }
+    };
+
+    const handleQualityChange = (quality: string) => {
+        setCurrentQuality(quality);
+        setShowQualityMenu(false);
+        console.log(`Switching to ${quality} quality`);
+    };
+
+    useEffect(() => {
+        setupHLS();
+        handleVideoEvents();
+        return () => {
+            if (hlsRef.current) {
+                hlsRef.current.destroy();
+            }
+            if (controlsTimeoutRef.current) {
+                clearTimeout(controlsTimeoutRef.current);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        const handleFullscreenChange = () => {
+            setIsFullscreen(!!document.fullscreenElement);
+        };
+
+        document.addEventListener('fullscreenchange', handleFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    }, []);
+
+
+    return (
+        <div
+            ref={videoContainerRef}
+            className="relative aspect-video w-full bg-gradient-to-br from-slate-700 via-slate-800 to-black group"
+            onMouseMove={resetControlsTimeout}
+            onMouseLeave={() => playing && setShowControls(false)}
+        >
+            <video
+                ref={videoRef}
+                className="w-full h-full object-cover"
+                playsInline
+                muted={muted}
+            />
+
+            {/* Loading overlay */}
+            {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <div className="flex items-center gap-2 text-white">
+                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <span>Loading stream...</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Error overlay */}
+            {videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <div className="flex items-center gap-2 text-white bg-red-500/20 rounded-lg p-4">
+                        <AlertCircle className="h-6 w-6" />
+                        <span>{videoError}</span>
+                    </div>
+                </div>
+            )}
+
+            {/* Click to play overlay */}
+            {!playing && !isLoading && !videoError && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                    <button
+                        onClick={togglePlay}
+                        className="rounded-full bg-white/20 p-4 backdrop-blur hover:bg-white/30 transition-colors"
+                    >
+                        <Play className="h-8 w-8 ml-1" />
+                    </button>
+                </div>
+            )}
+
+            {/* Video controls */}
+            <div className={`absolute inset-0 flex items-end justify-between p-4 transition-opacity duration-300 ${showControls || !playing ? 'opacity-100' : 'opacity-0'}`}>
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 rounded-xl bg-black/40 p-2 backdrop-blur">
+                        <button
+                            onClick={togglePlay}
+                            className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+                            aria-label={playing ? 'Pause' : 'Play'}
+                        >
+                            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                        </button>
+
+                        <div className="relative">
+                            <button
+                                onClick={toggleMute}
+                                onMouseEnter={() => setShowVolumeSlider(true)}
+                                className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+                                aria-label={muted ? 'Unmute' : 'Mute'}
+                            >
+                                {muted || volume === 0 ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                            </button>
+
+                            {/* Volume slider */}
+                            {showVolumeSlider && (
+                                <div
+                                    className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/60 backdrop-blur rounded-lg p-2"
+                                    onMouseLeave={() => setShowVolumeSlider(false)}
+                                >
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={muted ? 0 : volume}
+                                        onChange={(e) => handleVolumeChange(parseFloat(e.target.value))}
+                                        className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                                        style={{
+                                            background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(muted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(muted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 rounded-xl bg-black/40 p-2 backdrop-blur">
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowQualityMenu(!showQualityMenu)}
+                                className="rounded-lg bg-white/10 p-2 text-[10px] hover:bg-white/15 transition-colors min-w-[50px]"
+                            >
+                                {currentQuality}
+                            </button>
+
+                            {showQualityMenu && (
+                                <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur rounded-lg overflow-hidden">
+                                    {QUALITY_OPTIONS.map((option) => (
+                                        <button
+                                            key={option.value}
+                                            onClick={() => handleQualityChange(option.value)}
+                                            className={`block w-full px-3 py-2 text-[10px] text-left hover:bg-white/10 transition-colors ${currentQuality === option.value ? 'bg-blue-500/20' : ''
+                                                }`}
+                                        >
+                                            {option.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        <button
+                            onClick={toggleFullscreen}
+                            className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+                            aria-label="Fullscreen"
+                        >
+                            <Maximize2 className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}

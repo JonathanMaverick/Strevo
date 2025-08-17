@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useUnmountEffect } from 'framer-motion';
 import {
   PlayCircle,
   Share2,
@@ -18,9 +18,10 @@ import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
 import { useAuth } from '../contexts/auth.context';
 import { StreamHistory } from "../interfaces/stream-history";
-import { getStreamHistory } from "../services/stream-history.service";
+import { getAllStreamHistory } from "../services/stream-history.service";
 import Loading from './Loading';
 import { useFollowing } from "../services/followService";
+import { render } from "@testing-library/react";
 
 export default function Profile() {
   const { principalId } = useParams();
@@ -33,18 +34,10 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) {
-      getStreamHistory(user.principal_id).then(history => setStreamHistory(history));
+      getAllStreamHistory(user.principal_id).then(history => setStreamHistory(history));
       checkFollowingStatus(user.principal_id);
     }
   }, [user]);
-
-  useEffect(() => {
-    console.log('stats', stats);
-  }, [stats])
-
-  useEffect(() => {
-    console.log('streamhistory is set to ', streamHistory)
-  }, [streamHistory])
 
   if (isLoading || !isProfileLoaded) {
     return (
@@ -114,7 +107,6 @@ export default function Profile() {
       </div>
 
       <Navbar />
-
       <main className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] overflow-visible">
           <div className="relative h-48 w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-black">
@@ -271,7 +263,7 @@ export default function Profile() {
                     {streamHistory.map((v, i) => (
                       <a
                         key={i}
-                        href="#"
+                        href={`/stream-history/${v.streamHistoryID}`}
                         className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
                       >
                         <div

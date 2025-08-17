@@ -22,7 +22,7 @@ export function useUserProfile(targetPrincipal?: string) {
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
-
+  
   const { data: followersCountData, call: fetchFollowersCount } = useQueryCall({
     functionName: 'getFollowersCount',
     args: [profilePrincipal || ''],
@@ -76,7 +76,6 @@ export function useUserProfile(targetPrincipal?: string) {
       | MotokoResult<boolean, string>
       | null
       | undefined;
-      console.log(result)
     if (!isOkResult(result)) return false;
     return result.ok;
   };
@@ -140,9 +139,14 @@ export function useUserProfile(targetPrincipal?: string) {
   }, [profilePrincipal, loadProfile]);
 
   useEffect(() => {
+    console.log('mounting')
     if (targetPrincipal) {
       setProfilePrincipal(targetPrincipal);
       loadProfile(targetPrincipal);
+    }
+
+    return () => {
+      console.log('unmounting')
     }
   }, []);
 
