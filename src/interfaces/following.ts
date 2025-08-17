@@ -1,11 +1,11 @@
 import { User } from './user';
 
-export interface Following {
+export interface FollowingInterface {
   following: User;
   principal_id: string;
 }
 
-export interface Followers {
+export interface FollowersInterface {
   principal_id: string;
   followers: User;
 }

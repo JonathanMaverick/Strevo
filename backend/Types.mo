@@ -12,6 +12,11 @@ module {
        following : User; 
     };
 
+    public type Followers = {
+       principal_id : Text;
+       followers : User; 
+    };
+
     public type Subscribe = {
         principal_id : Text;
         subscribing: User;

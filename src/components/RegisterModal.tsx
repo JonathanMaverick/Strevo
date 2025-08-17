@@ -13,6 +13,7 @@ type Props = {
     profile_picture: string;
   }) => Promise<void>;
   supabaseUrl: string;
+  registerLoading: boolean
 };
 
 export default function RegisterModal({
@@ -20,6 +21,7 @@ export default function RegisterModal({
   onClose,
   onRegister,
   supabaseUrl,
+  registerLoading,
 }: Props) {
   const [username, setUsername] = useState('');
   const [profileUrl, setProfileUrl] = useState('');
@@ -47,9 +49,11 @@ export default function RegisterModal({
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username) return;
+    if (!username || registerLoading) return;
     await onRegister({ username, profile_picture: profileUrl });
-    onClose();
+    if (!registerLoading) {
+      onClose();
+    }
   };
 
   return (
@@ -59,7 +63,8 @@ export default function RegisterModal({
           <h2 className="text-lg font-semibold text-white">Create Account</h2>
           <button
             onClick={onClose}
-            className="rounded-lg border border-white/10 p-1"
+            disabled={registerLoading}
+            className="rounded-lg border border-white/10 p-1 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <X className="h-4 w-4" />
           </button>
@@ -78,7 +83,8 @@ export default function RegisterModal({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              disabled={registerLoading}
+              className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-white placeholder-white/40 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               placeholder="Enter your username"
             />
           </div>
@@ -91,13 +97,17 @@ export default function RegisterModal({
               {busy && (
                 <span className="text-xs text-white/60">Uploading…</span>
               )}
+              {registerLoading && (
+                <span className="text-xs text-white/60">Creating account…</span>
+              )}
             </div>
             <div className="flex items-center gap-3">
-              <label className="inline-flex cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10">
+              <label className={`inline-flex cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10 ${registerLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
+                  disabled={registerLoading}
                   onChange={(e) => handleFile(e.target.files?.[0])}
                 />
                 Choose Image
@@ -114,7 +124,8 @@ export default function RegisterModal({
               <input
                 readOnly
                 value={profileUrl}
-                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80"
+                disabled={registerLoading}
+                className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-white/80 disabled:opacity-50"
               />
             )}
           </div>
@@ -123,16 +134,17 @@ export default function RegisterModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 rounded-lg border border-white/20 px-4 py-2 text-sm text-white/80 hover:bg-white/5"
+              disabled={registerLoading}
+              className="flex-1 rounded-lg border border-white/20 px-4 py-2 text-sm text-white/80 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={busy || !username}
-              className="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium text-white hover:from-sky-600 hover:to-blue-700 disabled:opacity-50"
+              disabled={busy || !username || registerLoading}
+              className="flex-1 rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2 text-sm font-medium text-white hover:from-sky-600 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Create account
+              {registerLoading ? 'Creating account…' : 'Create account'}
             </button>
           </div>
         </form>

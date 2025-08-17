@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Settings,
   LogOut,
+  Loader2,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -15,7 +16,6 @@ import RegisterModal from '../components/RegisterModal';
 import { useAuth } from '../contexts/auth.context';
 
 export default function Navbar() {
-  const { disconnect } = useConnect();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -24,31 +24,7 @@ export default function Navbar() {
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const { isConnected, principal, user, handleLogin, handleRegister, userLoading } = useAuth(); 
-
-  const stableHandleLogin = useCallback(async () => {
-    if (!isConnected || !principal || userLoading || hasAttemptedLogin) return;
-    
-    try {
-      setHasAttemptedLogin(true);
-      await handleLogin();
-    } catch (error) {
-      console.error('Login failed:', error);
-      setHasAttemptedLogin(false);
-    }
-  }, [isConnected, principal, handleLogin, userLoading, hasAttemptedLogin]);
-
-  useEffect(() => {
-    if (!isConnected || !principal) {
-      setHasAttemptedLogin(false);
-    }
-  }, [isConnected, principal]);
-
-  useEffect(() => {
-    if (isConnected && principal && !user && !userLoading && !hasAttemptedLogin) {
-      stableHandleLogin();
-    }
-  }, [isConnected, principal, user, userLoading, hasAttemptedLogin, stableHandleLogin]);
+  const { isConnected, principal, user, isConnecting, handleRegister, handleDisconnect, registerLoading } = useAuth(); 
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
@@ -95,7 +71,7 @@ export default function Navbar() {
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10 cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600">
@@ -116,7 +92,7 @@ export default function Navbar() {
             className="absolute right-0 mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#0B1220]/95 shadow-2xl ring-1 ring-black/5 backdrop-blur"
           >
             <Link
-              to="/profile"
+              to={`/profiles/${principal}`}
               role="menuitem"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
@@ -138,7 +114,7 @@ export default function Navbar() {
               type="button"
               onClick={() => {
                 setMenuOpen(false);
-                disconnect();
+                handleDisconnect();
               }}
               className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-white/90 hover:bg-white/5"
             >
@@ -152,7 +128,12 @@ export default function Navbar() {
   };
 
   const renderUserStatus = () => {
-    if (!isConnected) return <ConnectButton>Connect Wallet</ConnectButton>;
+    if (!isConnected) return <>
+      <ConnectButton>Connect Wallet</ConnectButton> <ConnectDialog />
+    </> 
+    if (isConnecting) return <>
+                <Loader2 className="w-5 h-5 animate-spin text-blue-600" /> <span className="text-blue-600 font-medium">Connecting wallet...</span>
+    </>
     if (user) return <ProfileDropdown />;
     return (
       <div className="flex items-center gap-3">
@@ -169,7 +150,7 @@ export default function Navbar() {
         </button>
         <button
           type="button"
-          onClick={disconnect}
+          onClick={handleDisconnect}
           className="text-sm text-white/60 hover:text-white/80"
         >
           Disconnect
@@ -288,7 +269,7 @@ export default function Navbar() {
                           type="button"
                           onClick={() => {
                             setMobileOpen(false);
-                            disconnect();
+                            handleDisconnect();
                           }}
                           className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-white/90 hover:bg-white/5"
                         >
@@ -320,7 +301,7 @@ export default function Navbar() {
                           type="button"
                           onClick={() => {
                             setMobileOpen(false);
-                            disconnect();
+                            handleDisconnect();
                           }}
                           className="rounded-lg px-3 py-2 text-sm text-white/60 hover:text-white/80"
                         >
@@ -334,8 +315,6 @@ export default function Navbar() {
             </div>
           </div>
         )}
-
-        <ConnectDialog />
       </header>
 
       <RegisterModal
@@ -343,6 +322,7 @@ export default function Navbar() {
         onClose={() => setShowRegisterModal(false)}
         onRegister={onRegister}
         supabaseUrl={import.meta.env.VITE_SUPABASE_URL as string}
+        registerLoading={registerLoading}
       />
     </>
   );

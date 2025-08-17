@@ -1,5 +1,4 @@
 import { useQueryCall } from '@ic-reactor/react';
-import { useConnect } from '@connect2ic/react';
 import { User } from '../interfaces/user';
 import { UserStats } from '../interfaces/user-stats';
 import {
@@ -8,76 +7,49 @@ import {
   MotokoResult,
 } from '../interfaces/motoko-result';
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../contexts/auth.context';
+import { FollowersInterface, FollowingInterface } from '../interfaces/following';
 
 export function useUserProfile(targetPrincipal?: string) {
-  const { isConnected, principal } = useConnect();
+  const { principal } = useAuth();
   const [profilePrincipal, setProfilePrincipal] = useState<string | null>(
     targetPrincipal || null,
   );
+  const [isLoading, setIsLoading] = useState(false);
 
-  const {
-    data: userData,
-    loading: userLoading,
-    error: userError,
-    call: fetchUser,
-  } = useQueryCall({
+  const { data: userData, call: fetchUser } = useQueryCall({
     functionName: 'getUser',
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
 
-  const {
-    data: followersCountData,
-    loading: followersCountLoading,
-    error: followersCountError,
-    call: fetchFollowersCount,
-  } = useQueryCall({
+  const { data: followersCountData, call: fetchFollowersCount } = useQueryCall({
     functionName: 'getFollowersCount',
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
 
-  const {
-    data: followingCountData,
-    loading: followingCountLoading,
-    error: followingCountError,
-    call: fetchFollowingCount,
-  } = useQueryCall({
+  const { data: followingCountData, call: fetchFollowingCount } = useQueryCall({
     functionName: 'getFollowingCount',
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
 
-  const {
-    data: isFollowingData,
-    loading: isFollowingLoading,
-    error: isFollowingError,
-    call: checkIsFollowing,
-  } = useQueryCall({
-    functionName: 'isFollowing',
-    args: [principal || '', profilePrincipal || ''],
-    refetchOnMount: false,
-  });
-
-  const {
-    data: followingListData,
-    loading: followingListLoading,
-    error: followingListError,
-    call: fetchFollowingList,
-  } = useQueryCall({
+  const { data: followingListData, call: fetchFollowingList } = useQueryCall({
     functionName: 'getAllFollowing',
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
 
-  const {
-    data: followersListData,
-    loading: followersListLoading,
-    error: followersListError,
-    call: fetchFollowersList,
-  } = useQueryCall({
+  const { data: followersListData, call: fetchFollowersList } = useQueryCall({
     functionName: 'getAllFollowers',
     args: [profilePrincipal || ''],
+    refetchOnMount: false,
+  });
+
+  const { data: isFollowingData, loading: isFollowingLoading, call: fetchIsFollowing } = useQueryCall({
+    functionName: 'isFollowing',
+    args: [principal || '', profilePrincipal || ''],
     refetchOnMount: false,
   });
 
@@ -88,19 +60,13 @@ export function useUserProfile(targetPrincipal?: string) {
   };
 
   const getFollowersCount = (): number => {
-    const result = followersCountData as
-      | MotokoResult<bigint, string>
-      | null
-      | undefined;
+    const result = followersCountData as MotokoResult<bigint, string> | null | undefined;
     if (!isOkResult(result)) return 0;
     return Number(result.ok);
   };
 
   const getFollowingCount = (): number => {
-    const result = followingCountData as
-      | MotokoResult<bigint, string>
-      | null
-      | undefined;
+    const result = followingCountData as MotokoResult<bigint, string> | null | undefined;
     if (!isOkResult(result)) return 0;
     return Number(result.ok);
   };
@@ -110,35 +76,27 @@ export function useUserProfile(targetPrincipal?: string) {
       | MotokoResult<boolean, string>
       | null
       | undefined;
+      console.log(result)
     if (!isOkResult(result)) return false;
     return result.ok;
   };
 
-  const getFollowingList = () => {
-    const result = followingListData as
-      | MotokoResult<any[], string>
-      | null
-      | undefined;
+  const getFollowingList = (): FollowingInterface[] => {
+    const result = followingListData as MotokoResult<FollowingInterface[], string> | null | undefined;
     if (!isOkResult(result)) return [];
     return result.ok;
   };
 
-  const getFollowersList = () => {
-    const result = followersListData as
-      | MotokoResult<any[], string>
-      | null
-      | undefined;
+  const getFollowersList = (): FollowersInterface[] => {
+    const result = followersListData as MotokoResult<FollowersInterface[], string> | null | undefined;
     if (!isOkResult(result)) return [];
     return result.ok;
   };
 
-  const getUserStats = (): UserStats => {
-    return {
-      followersCount: getFollowersCount(),
-      followingCount: getFollowingCount(),
-      isFollowing: getIsFollowing(),
-    };
-  };
+  const getUserStats = (): UserStats => ({
+    followersCount: getFollowersCount(),
+    followingCount: getFollowingCount(),
+  });
 
   const getUserError = (): string | null => {
     const result = userData as MotokoResult<User, string> | null | undefined;
@@ -147,14 +105,8 @@ export function useUserProfile(targetPrincipal?: string) {
   };
 
   const getStatsError = (): string | null => {
-    const followersResult = followersCountData as
-      | MotokoResult<bigint, string>
-      | null
-      | undefined;
-    const followingResult = followingCountData as
-      | MotokoResult<bigint, string>
-      | null
-      | undefined;
+    const followersResult = followersCountData as MotokoResult<bigint, string> | null | undefined;
+    const followingResult = followingCountData as MotokoResult<bigint, string> | null | undefined;
 
     if (isErrResult(followersResult)) return followersResult.err;
     if (isErrResult(followingResult)) return followingResult.err;
@@ -164,34 +116,23 @@ export function useUserProfile(targetPrincipal?: string) {
 
   const loadProfile = useCallback(
     async (userPrincipal: string) => {
-
-      await Promise.all([
-        fetchUser([userPrincipal]),
-        fetchFollowersCount([userPrincipal]),
-        fetchFollowingCount([userPrincipal]),
-        fetchFollowingList([userPrincipal]),
-        fetchFollowersList([userPrincipal]),
-      ]);
-
-      if (principal && principal !== userPrincipal) {
-        await checkIsFollowing([principal, userPrincipal]);
+      setIsLoading(true);
+      try {
+        await Promise.all([
+          fetchUser([userPrincipal]),
+          fetchFollowersCount([userPrincipal]),
+          fetchFollowingCount([userPrincipal]),
+          fetchFollowingList([userPrincipal]),
+          fetchFollowersList([userPrincipal]),
+        ]);
+      } finally {
+        setIsLoading(false);
       }
     },
-    [
-      fetchUser,
-      fetchFollowersCount,
-      fetchFollowingCount,
-      fetchFollowingList,
-      fetchFollowersList,
-      checkIsFollowing,
-      principal,
-    ],
+    [fetchUser, fetchFollowersCount, fetchFollowingCount, fetchFollowingList, fetchFollowersList, principal],
   );
 
-  const loadOwnProfile = useCallback(async () => {
-    if (!principal) return;
-    await loadProfile(principal);
-  }, [principal, loadProfile]);
+  const isOwnProfile = principal === profilePrincipal;
 
   const refreshProfile = useCallback(async () => {
     if (!profilePrincipal) return;
@@ -199,54 +140,40 @@ export function useUserProfile(targetPrincipal?: string) {
   }, [profilePrincipal, loadProfile]);
 
   useEffect(() => {
-    if (targetPrincipal && targetPrincipal !== profilePrincipal) {
+    if (targetPrincipal) {
+      setProfilePrincipal(targetPrincipal);
       loadProfile(targetPrincipal);
     }
-  }, [targetPrincipal, profilePrincipal, loadProfile]);
-
-  const isOwnProfile = principal === profilePrincipal;
+  }, []);
 
   const isProfileLoaded = Boolean(profilePrincipal && getUser());
-
-  const isLoading =
-    userLoading || followersCountLoading || followingCountLoading;
-  const isStatsLoading =
-    followersCountLoading || followingCountLoading || isFollowingLoading;
-
-  const hasError = Boolean(
-    userError || followersCountError || followingCountError,
-  );
+  const hasError = Boolean(getUserError() || getStatsError());
   const error = getUserError() || getStatsError();
+
+  useEffect(() => {
+    fetchIsFollowing();
+  }, [principal, profilePrincipal]);
 
   return {
     user: getUser(),
     stats: getUserStats(),
     followingList: getFollowingList(),
     followersList: getFollowersList(),
-    profilePrincipal,
+    isFollowing : getIsFollowing(),
+
+    isFollowingLoading,
+
     isOwnProfile,
     isProfileLoaded,
-
     isLoading,
-    isStatsLoading,
-    userLoading,
-    followersCountLoading,
-    followingCountLoading,
-    isFollowingLoading,
-    followingListLoading,
-    followersListLoading,
-
     hasError,
     error,
+
     userError: getUserError(),
     statsError: getStatsError(),
 
     loadProfile,
-    loadOwnProfile,
     refreshProfile,
     setProfilePrincipal,
-
-    isConnected,
-    currentUserPrincipal: principal,
   };
 }
