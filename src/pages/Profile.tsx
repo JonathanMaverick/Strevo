@@ -16,17 +16,23 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
 import { useAuth } from '../contexts/auth.context';
+import { StreamHistory } from "../interfaces/stream-history";
+import { getStreamHistory } from "../services/stream-history.service";
 
 export default function Profile() {
-  const {user} = useAuth();
-  const {stats} = useUserProfile(user?.principal_id)
+  const { user } = useAuth();
+  const { stats } = useUserProfile(user?.principal_id)
+  const [streamHistory, setStreamHistory] = useState<StreamHistory[]>([]);
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
   useEffect(() => {
-    console.log(user)
+    if (user) {
+      getStreamHistory(user.principal_id).then(history => setStreamHistory(history));
+    }
   }, []);
+
 
   const displayName = user?.username || 'Your Name';
   const avatarUrl =
@@ -39,7 +45,7 @@ export default function Profile() {
         : `${stats.followersCount}`
       : '—';
 
-  const followersHref =user?.principal_id 
+  const followersHref = user?.principal_id
     ? `/profile/${user.principal_id}/followers`
     : `/followers`;
 
@@ -225,11 +231,10 @@ export default function Profile() {
                   <button
                     key={t.key}
                     onClick={() => setActiveTab(t.key as typeof activeTab)}
-                    className={`rounded-full border px-3 py-1.5 text-xs ${
-                      activeTab === t.key
+                    className={`rounded-full border px-3 py-1.5 text-xs ${activeTab === t.key
                         ? 'border-white/20 bg-white/10 font-semibold'
                         : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
-                    }`}
+                      }`}
                   >
                     {t.label}
                   </button>
@@ -239,20 +244,25 @@ export default function Profile() {
               <div className="mt-4">
                 {activeTab === 'videos' && (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {videos.map((v, i) => (
+                    {streamHistory.map((v, i) => (
                       <a
                         key={i}
                         href="#"
                         className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
                       >
                         <div
-                          className={`relative aspect-video w-full bg-gradient-to-br ${v.color}`}
+                          className={`relative aspect-video w-full bg-[url(${v.thumbnail})]`}
                         >
+                          <img
+                            src={v.thumbnail}
+                            alt={v.title}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
                           <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {v.tag}
+                            {v.categoryName}
                           </div>
                           <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {v.length}
+                          {new Date(v.duration * 1000).toISOString().slice(11, 19)}
                           </div>
                         </div>
                         <div className="p-3">
@@ -260,7 +270,7 @@ export default function Profile() {
                             {v.title}
                           </p>
                           <p className="mt-1 text-xs text-white/60">
-                            {v.views} views
+                            {v.totalView} views
                           </p>
                         </div>
                       </a>

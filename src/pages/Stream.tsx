@@ -316,7 +316,6 @@ export default function Stream() {
       navigate(-1);
       return;
     }
-    console.log(principalId)
     loadProfile(principalId);
     checkFollowingStatus(principalId).then(isFollowing => {setIsFollowing(isFollowing); console.log('isFollowing', isFollowing)});
     refetchUser();

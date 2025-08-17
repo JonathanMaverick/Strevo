@@ -12,6 +12,7 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useState,
 } from 'react';
 
 export interface AuthContextType {
@@ -35,6 +36,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const { isConnected, principal } = useConnect();
+  const [principalState, setPrincipal] = useState<string | undefined>();
 
   const {
     data: userData,
@@ -133,6 +135,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       fetchUser,
     ]
   );
+
+  // if (!principal) {
+  //   return <p>loading</p>
+  // }
 
   return (
     <AuthContext.Provider value={contextValue}>

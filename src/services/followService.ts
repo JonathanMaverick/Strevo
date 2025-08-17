@@ -7,7 +7,7 @@ import {
   isOkResult,
   MotokoResult,
 } from '../interfaces/motoko-result';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/auth.context';
 
 export function useFollowing() {
@@ -176,7 +176,6 @@ export function useFollowing() {
   };
 
   const handleFollow = async (targetPrincipal: string) => {
-    console.log(principal);
     if (!principal) throw new Error('Wallet not connected');
     await followUser([principal, targetPrincipal]);
   };
