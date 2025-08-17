@@ -22,7 +22,7 @@ export function useUserProfile(targetPrincipal?: string) {
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
-
+  
   const { data: followersCountData, call: fetchFollowersCount } = useQueryCall({
     functionName: 'getFollowersCount',
     args: [profilePrincipal || ''],
@@ -140,18 +140,11 @@ export function useUserProfile(targetPrincipal?: string) {
   }, [profilePrincipal, loadProfile]);
 
   useEffect(() => {
-    if (targetPrincipal && targetPrincipal !== profilePrincipal) {
+    if (targetPrincipal) {
       setProfilePrincipal(targetPrincipal);
       loadProfile(targetPrincipal);
     }
-  }, [targetPrincipal, profilePrincipal, loadProfile]);
-
-  useEffect(() => {
-    if (targetPrincipal && targetPrincipal !== profilePrincipal) {
-      loadProfile(targetPrincipal);
-      setProfilePrincipal(targetPrincipal);
-    }
-  }, [targetPrincipal, profilePrincipal, loadProfile]);
+  }, []);
 
   const isProfileLoaded = Boolean(profilePrincipal && getUser());
   const hasError = Boolean(getUserError() || getStatsError());

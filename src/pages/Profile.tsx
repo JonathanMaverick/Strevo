@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useUnmountEffect } from 'framer-motion';
 import {
   PlayCircle,
   Share2,
@@ -10,32 +10,38 @@ import {
   Calendar,
   Clock,
   Settings as SettingsIcon,
+  ChartNoAxesColumnDecreasing,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useUserProfile } from '../services/userProfileService';
 import { useAuth } from '../contexts/auth.context';
+import { StreamHistory } from "../interfaces/stream-history";
+import { getAllStreamHistory } from "../services/stream-history.service";
 import Loading from './Loading';
+import { useFollowing } from "../services/followService";
+import { render } from "@testing-library/react";
 
 export default function Profile() {
-  const {user, userLoading} = useAuth();
-  const {stats} = useUserProfile(user?.principal_id)
+  const { principalId } = useParams();
+  const { stats, user, isProfileLoaded, isLoading, isOwnProfile } = useUserProfile(principalId);
+  const [streamHistory, setStreamHistory] = useState<StreamHistory[]>([]);
+  const { isFollowing, handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
-  if (userLoading) {
+  useEffect(() => {
+    if (user) {
+      getAllStreamHistory(user.principal_id).then(history => setStreamHistory(history));
+      checkFollowingStatus(user.principal_id);
+    }
+  }, [user]);
+
+  if (isLoading || !isProfileLoaded) {
     return (
       <Loading />
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-black">
-        Please login to view profile
-      </div>
     );
   }
 
@@ -50,7 +56,7 @@ export default function Profile() {
         : `${stats.followersCount}`
       : '—';
 
-  const followersHref =user?.principal_id 
+  const followersHref = user?.principal_id
     ? `/profile/${user.principal_id}/followers`
     : `/followers`;
 
@@ -101,7 +107,6 @@ export default function Profile() {
       </div>
 
       <Navbar />
-
       <main className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] overflow-visible">
           <div className="relative h-48 w-full overflow-hidden rounded-t-2xl bg-gradient-to-br from-slate-700 via-slate-800 to-black">
@@ -129,9 +134,15 @@ export default function Profile() {
                       <PlayCircle className="h-4 w-4" />
                       Watch Live
                     </button>
-                    <button className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
-                      Follow
-                    </button>
+                    {!isOwnProfile && (isFollowing ?
+                      <button className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleUnfollow(principalId!)} disabled={unfollowLoading}>
+                        Unfollow
+                      </button>
+                      :
+                      <button className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleFollow(principalId!)} disabled={followLoading}>
+                        Follow
+                      </button>
+                    )}
                     <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
                       <Crown className="h-4 w-4" />
                       Subscribe
@@ -236,11 +247,10 @@ export default function Profile() {
                   <button
                     key={t.key}
                     onClick={() => setActiveTab(t.key as typeof activeTab)}
-                    className={`rounded-full border px-3 py-1.5 text-xs ${
-                      activeTab === t.key
-                        ? 'border-white/20 bg-white/10 font-semibold'
-                        : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
-                    }`}
+                    className={`rounded-full border px-3 py-1.5 text-xs ${activeTab === t.key
+                      ? 'border-white/20 bg-white/10 font-semibold'
+                      : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
+                      }`}
                   >
                     {t.label}
                   </button>
@@ -250,20 +260,25 @@ export default function Profile() {
               <div className="mt-4">
                 {activeTab === 'videos' && (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {videos.map((v, i) => (
+                    {streamHistory.map((v, i) => (
                       <a
                         key={i}
-                        href="#"
+                        href={`/stream-history/${v.streamHistoryID}`}
                         className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
                       >
                         <div
-                          className={`relative aspect-video w-full bg-gradient-to-br ${v.color}`}
+                          className={`relative aspect-video w-full bg-[url(${v.thumbnail})]`}
                         >
+                          <img
+                            src={v.thumbnail}
+                            alt={v.title}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
                           <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {v.tag}
+                            {v.categoryName}
                           </div>
                           <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {v.length}
+                            {new Date(v.duration * 1000).toISOString().slice(11, 19)}
                           </div>
                         </div>
                         <div className="p-3">
@@ -271,7 +286,7 @@ export default function Profile() {
                             {v.title}
                           </p>
                           <p className="mt-1 text-xs text-white/60">
-                            {v.views} views
+                            {v.totalView} views
                           </p>
                         </div>
                       </a>

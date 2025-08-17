@@ -19,6 +19,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
@@ -70,7 +71,7 @@ export default function Navbar() {
           onClick={() => setMenuOpen((v) => !v)}
           aria-haspopup="menu"
           aria-expanded={menuOpen}
-          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10"
+          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10 cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600">
@@ -91,7 +92,7 @@ export default function Navbar() {
             className="absolute right-0 mt-2 w-48 overflow-hidden rounded-xl border border-white/10 bg-[#0B1220]/95 shadow-2xl ring-1 ring-black/5 backdrop-blur"
           >
             <Link
-              to="/profile"
+              to={`/profiles/${principal}`}
               role="menuitem"
               onClick={() => setMenuOpen(false)}
               className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
