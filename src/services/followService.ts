@@ -175,6 +175,7 @@ export function useFollowing() {
   };
 
   const handleFollow = async (targetPrincipal: string) => {
+    console.log('aaa', targetPrincipal, principal, isConnected);
     if (!principal) throw new Error('Wallet not connected');
     if (!isConnected) throw new Error('Wallet not connected');
 
@@ -204,6 +205,7 @@ export function useFollowing() {
   };
 
   const checkFollowingStatus = async (targetPrincipal: string) => {
+    console.log('checking following status for', principal);
     if (!principal) return false;
     setSelectedUser(targetPrincipal);
     await checkIsFollowing([principal, targetPrincipal]);

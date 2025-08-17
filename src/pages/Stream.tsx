@@ -155,7 +155,7 @@ export default function Stream() {
     video.addEventListener('waiting', handleWaiting);
     video.addEventListener('playing', handlePlaying);
     video.addEventListener('pause', handlePause);
-    video.addEventListener('volumechange', handleVolumeChange);
+    video.addEventListener('volu, principal, isConnectedmechange', handleVolumeChange);
 
     return () => {
       video.removeEventListener('timeupdate', updateProgress);
@@ -317,7 +317,7 @@ export default function Stream() {
       return;
     }
     loadProfile(principalId);
-    checkFollowingStatus(principalId).then(isFollowing => setIsFollowing(isFollowing));
+    checkFollowingStatus(principalId).then(isFollowing => {console.log('is following?', isFollowing); setIsFollowing(isFollowing)});
     refetchUser();
 
     // Setup WebSocket
@@ -375,10 +375,6 @@ export default function Stream() {
     },
   ];
 
-  const onFollow = async () => {
-    handleFollow(principalId!);
-  };
-
   if (!isProfileLoaded) {
     return (
       <div className="min-h-screen bg-[#0A0E17] text-white flex items-center justify-center">
@@ -421,11 +417,11 @@ export default function Stream() {
           </div>
           <div className="flex items-center gap-2">
             {!isOwnProfile && (isFollowing ?
-              <button className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold" onClick={() => handleUnfollow(principalId!)} disabled={unfollowLoading}>
+              <button className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleUnfollow(principalId!)} disabled={unfollowLoading}>
                 Unfollow
               </button>
               :
-              <button className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold" onClick={onFollow} disabled={followLoading}>
+              <button className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleFollow(principalId!)} disabled={followLoading}>
                 Follow
               </button>
             )}
