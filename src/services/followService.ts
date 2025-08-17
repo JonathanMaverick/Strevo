@@ -8,9 +8,10 @@ import {
   MotokoResult,
 } from '../interfaces/motoko-result';
 import { useState, useCallback } from 'react';
+import { useAuth } from '../contexts/auth.context';
 
 export function useFollowing() {
-  const { isConnected, principal } = useConnect();
+  const {principal} = useAuth();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   const {
@@ -176,15 +177,11 @@ export function useFollowing() {
 
   const handleFollow = async (targetPrincipal: string) => {
     if (!principal) throw new Error('Wallet not connected');
-    if (!isConnected) throw new Error('Wallet not connected');
-
     await followUser([principal, targetPrincipal]);
   };
 
   const handleUnfollow = async (targetPrincipal: string) => {
     if (!principal) throw new Error('Wallet not connected');
-    if (!isConnected) throw new Error('Wallet not connected');
-
     await unfollowUser([principal, targetPrincipal]);
   };
 
@@ -204,7 +201,9 @@ export function useFollowing() {
   };
 
   const checkFollowingStatus = async (targetPrincipal: string) => {
+    console.log(principal)
     if (!principal) return false;
+    console.log(principal, targetPrincipal)
     setSelectedUser(targetPrincipal);
     await checkIsFollowing([principal, targetPrincipal]);
     return getIsFollowing();
@@ -265,7 +264,6 @@ export function useFollowing() {
   };
 
   return {
-    isConnected,
     principal,
 
     followingList: getFollowingList(),
