@@ -23,6 +23,8 @@ import {
   Crown,
   AlertCircle,
   Loader2,
+  Eye,
+  User,
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -43,34 +45,27 @@ const QUALITY_OPTIONS = [
   { label: 'Auto', value: 'auto' },
 ];
 
+const formatViewerCount = (count: number) => {
+  if (count >= 1000000) {
+    return `${(count / 1000000).toFixed(1)}M`;
+  } else if (count >= 1000) {
+    return `${(count / 1000).toFixed(1)}K`;
+  }
+  return count.toString();
+};
+
 export default function Stream() {
   const { principalId } = useParams();
   const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(principalId);
   const { user: currentUser, userLoading } = useAuth();
   const { isFollowing, handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
-  
-  const [playing, setPlaying] = useState(false);
-  const [muted, setMuted] = useState(true);
-  const [volume, setVolume] = useState(1);
-  const [previousVolume, setPreviousVolume] = useState(1);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [buffered, setBuffered] = useState(0);
   const [isLive, setIsLive] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [showQualityMenu, setShowQualityMenu] = useState(false);
-  const [currentQuality, setCurrentQuality] = useState('auto');
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
-  
   const [showChat, setShowChat] = useState(true);
-  const [showControls, setShowControls] = useState(true);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  
   const navigate = useNavigate();
   const socketRef = useRef<WebSocket>(null!);
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const messageInputRef = useRef<HTMLInputElement>(null!);
+  const [viewerCount, setViewerCount] = useState(0);
 
   const handleIncomingMessage = (data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data]);
@@ -91,6 +86,8 @@ export default function Stream() {
       },
     };
 
+    console.log(payload);
+
     socketRef.current.send(JSON.stringify(payload));
     messageInputRef.current.value = '';
   };
@@ -100,16 +97,18 @@ export default function Stream() {
       navigate(-1);
       return;
     }
-    console.log(principalId)
     loadProfile(principalId);
     checkFollowingStatus(principalId);
 
-    socketRef.current = new WebSocket(`ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/aasd`);
+    socketRef.current = new WebSocket(`ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`);
     socketRef.current.onmessage = (event) => {
-      const message: SocketMessage<ChatMessage> = JSON.parse(event.data);
+      const message: SocketMessage<any> = JSON.parse(event.data);
       switch (message.type) {
         case SocketMessageType.ChatMessage:
           handleIncomingMessage(message.data);
+          break;
+        case SocketMessageType.ViewerCount:
+          setViewerCount(message.data);
           break;
       }
     };
@@ -170,9 +169,9 @@ export default function Stream() {
               <h1 className="text-lg font-semibold leading-tight">
                 {user?.username}
               </h1>
-              <p className="text-xs text-white/70">
-                FPS • Competitive • Coaching
-              </p>
+              <div className="flex items-center gap-2 text-xs text-white/70">
+                <span>FPS • Competitive • Coaching</span>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -214,9 +213,19 @@ export default function Stream() {
           >
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
-                <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase">
-                  <span className={`block h-2 w-2 rounded-full ${isLive ? 'animate-pulse bg-red-400' : 'bg-gray-400'}`} />
-                  {isLive ? 'Live Now' : 'Offline'}
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase">
+                    <span className={`block h-2 w-2 rounded-full ${isLive ? 'animate-pulse bg-red-400' : 'bg-gray-400'}`} />
+                    {isLive ? 'Live Now' : 'Offline'}
+                  </div>
+                  {isLive && (
+                    <div className="flex items-center gap-1 text-xs text-white/70">
+                      <User className="h-3 w-3" />
+                      <span className="font-medium">
+                        {formatViewerCount(viewerCount)} watching
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             <HLSVideoPlayer setIsLive={setIsLive} url={`${process.env.VITE_STREAMING_SERVER_URL}/watch/${user?.principal_id}/index.m3u8`}/>
@@ -226,9 +235,6 @@ export default function Stream() {
                   <div className="min-w-0">
                     <p className="line-clamp-1 text-sm font-semibold">
                       Pro scrims — finals practice
-                    </p>
-                    <p className="text-xs text-white/60">
-                      {isLive ? '12.4K watching' : 'Stream offline'} • FPS
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">
@@ -340,7 +346,6 @@ export default function Stream() {
                   />
                   <div className="text-sm font-semibold">Chat</div>
                 </div>
-                <div className="text-[10px] text-white/60">Live</div>
               </div>
               <div className="h-[40rem] space-y-3 overflow-y-auto px-4 pb-4">
                 {chatMessages.map((m, i) => (

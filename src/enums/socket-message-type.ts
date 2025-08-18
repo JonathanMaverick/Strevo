@@ -1,4 +1,5 @@
 export enum SocketMessageType {
     ChatMessage = "chat_message",
-    StartStream = "start_stream"
+    StartStream = "start_stream",
+    ViewerCount = 'viewer_count'
 }

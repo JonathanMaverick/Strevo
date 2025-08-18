@@ -1,8 +1,9 @@
 import axios, { HttpStatusCode } from "axios";
 
+const ENDPOINT = `http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/stream-history`
 export async function getAllStreamHistory(principalId: string) {
     try {
-        const response = await axios.get(`http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/stream-history/all-stream?hostPrincipalID=${principalId}`);
+        const response = await axios.get(`${ENDPOINT}/all-stream?hostPrincipalID=${principalId}`);
         console.log('response is ', response.status)
         if (response.status !== HttpStatusCode.Ok) {
             return undefined;
@@ -17,7 +18,7 @@ export async function getAllStreamHistory(principalId: string) {
 
 export async function getStreamHistoryById(streamHistoryId: string) {
     try {
-        const response = await axios.get(`http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/stream-history/by-id?streamHistoryID=${streamHistoryId}`);
+        const response = await axios.get(`${ENDPOINT}/by-id?streamHistoryID=${streamHistoryId}`);
         if (response.status !== HttpStatusCode.Ok) {
             return undefined;
         }

@@ -38,6 +38,7 @@ import { HLSVideoPlayer } from "../components/HLSVideoPlayer";
 import { StreamHistory } from "../interfaces/stream-history";
 import { getAllStreamHistory, getStreamHistoryById } from "../services/stream-history.service";
 import { VideoPlayer } from "../components/VideoPlayer";
+import { createViewerHistory } from "../services/viewer-history.service";
 
 
 export default function StreamHistoryPage() {
@@ -48,6 +49,7 @@ export default function StreamHistoryPage() {
     const navigate = useNavigate();
     const socketRef = useRef<WebSocket>(null!);
     const [streamHistory, setStreamHistory] = useState<StreamHistory>();
+    const { user: authUser} = useAuth();
     const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(streamHistory?.hostPrincipalID);
     useEffect(() => {
         if (!streamHistoryId) {
@@ -60,6 +62,10 @@ export default function StreamHistoryPage() {
             if (history) loadProfile(history.hostPrincipalID);
         });
     }, []);
+
+    useEffect(() => {
+        if (user) createViewerHistory(user.principal_id, streamHistoryId!)
+    }, [user]);
 
     const tags = ['FPS', 'Ranked', 'Scrims', 'Coaching', 'Analysis'];
 
