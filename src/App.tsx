@@ -19,10 +19,7 @@ import Settings from './pages/Settings';
 import Followers from './pages/Followers';
 import { AuthProvider } from './contexts/auth.context';
 import StreamExample from './pages/stream-example';
-<<<<<<< HEAD
-=======
 import StreamHistoryPage from "./pages/StreamHistory";
->>>>>>> features/stream-history
 
 function App() {
   const client = createClient({
@@ -45,10 +42,7 @@ function App() {
               <Route path="/profiles/:principalId" element={<Profile />} />
               <Route path="/following" element={<Following />} />
               <Route path="/stream/:principalId" element={<Stream />} />
-<<<<<<< HEAD
-=======
               <Route path="/stream-history/:streamHistoryId" element={<StreamHistoryPage />} />
->>>>>>> features/stream-history
               <Route path="/stream-ex/:streamerId" element={<StreamExample />} />
               <Route path="/settings" element={<Settings />} />
               <Route
