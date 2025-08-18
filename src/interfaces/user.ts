@@ -3,6 +3,7 @@ export interface User {
   username: string;
   profile_picture: string;
   streaming_key: string;
+  created_at?: number;
 }
 
 export interface UserRegistrationData {

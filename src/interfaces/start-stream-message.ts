@@ -1,6 +1,5 @@
-
 export interface StartStreamMessage {
-    streamerId: string;
-    streamId: string;
-    followers: string[];
+  streamerId: string;
+  streamId: string;
+  followers: string[];
 }

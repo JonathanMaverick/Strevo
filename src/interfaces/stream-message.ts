@@ -1,6 +1,6 @@
 export interface StreamMessage {
-    messageID: string;
-    senderID: string;
-    content: string;
-    createdAt: string;
+  messageID: string;
+  senderID: string;
+  content: string;
+  createdAt: string;
 }

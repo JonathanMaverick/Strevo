@@ -1,4 +1,11 @@
-import React, { FormEvent, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, {
+  FormEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useCallback,
+} from 'react';
 import { motion } from 'framer-motion';
 import {
   Play,
@@ -28,15 +35,15 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useNavigate, useParams } from "react-router-dom";
-import { useUserProfile } from "../services/userProfileService";
-import { useFollowing } from "../services/followService";
-import { ChatMessage } from "../interfaces/chat-message";
-import { SocketMessage } from "../interfaces/socket-message";
-import { SocketMessageType } from "../enums/socket-message-type";
-import Hls from "hls.js"
+import { useNavigate, useParams } from 'react-router-dom';
+import { ChatMessage } from '../interfaces/chat-message';
+import { SocketMessage } from '../interfaces/socket-message';
+import { SocketMessageType } from '../enums/socket-message-type';
+import Hls from 'hls.js';
 import { useAuth } from '../contexts/auth.context';
-import { HLSVideoPlayer } from "../components/HLSVideoPlayer";
+import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
+import { useUserProfile } from '../services/user-profile.service';
+import { useFollowing } from '../services/follow.service';
 
 const QUALITY_OPTIONS = [
   { label: '1080p', value: '1080p' },
@@ -56,9 +63,17 @@ const formatViewerCount = (count: number) => {
 
 export default function Stream() {
   const { principalId } = useParams();
-  const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(principalId);
+  const { user, loadProfile, isProfileLoaded, isOwnProfile } =
+    useUserProfile(principalId);
   const { user: currentUser, userLoading } = useAuth();
-  const { isFollowing, handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
+  const {
+    isFollowing,
+    handleFollow,
+    handleUnfollow,
+    checkFollowingStatus,
+    followLoading,
+    unfollowLoading,
+  } = useFollowing();
   const [isLive, setIsLive] = useState(false);
   const [showChat, setShowChat] = useState(true);
   const navigate = useNavigate();
@@ -100,7 +115,9 @@ export default function Stream() {
     loadProfile(principalId);
     checkFollowingStatus(principalId);
 
-    socketRef.current = new WebSocket(`ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`);
+    socketRef.current = new WebSocket(
+      `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`,
+    );
     socketRef.current.onmessage = (event) => {
       const message: SocketMessage<any> = JSON.parse(event.data);
       switch (message.type) {
@@ -175,15 +192,24 @@ export default function Stream() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!isOwnProfile && (isFollowing ?
-              <button className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleUnfollow(principalId!)} disabled={unfollowLoading}>
-                Unfollow
-              </button>
-              :
-              <button className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleFollow(principalId!)} disabled={followLoading}>
-                Follow
-              </button>
-            )}
+            {!isOwnProfile &&
+              (isFollowing ? (
+                <button
+                  className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
+                  onClick={() => handleUnfollow(principalId!)}
+                  disabled={unfollowLoading}
+                >
+                  Unfollow
+                </button>
+              ) : (
+                <button
+                  className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
+                  onClick={() => handleFollow(principalId!)}
+                  disabled={followLoading}
+                >
+                  Follow
+                </button>
+              ))}
             <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
               <Crown className="h-4 w-4" />
               Subscribe
@@ -215,7 +241,9 @@ export default function Stream() {
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase">
-                    <span className={`block h-2 w-2 rounded-full ${isLive ? 'animate-pulse bg-red-400' : 'bg-gray-400'}`} />
+                    <span
+                      className={`block h-2 w-2 rounded-full ${isLive ? 'animate-pulse bg-red-400' : 'bg-gray-400'}`}
+                    />
                     {isLive ? 'Live Now' : 'Offline'}
                   </div>
                   {isLive && (
@@ -228,7 +256,10 @@ export default function Stream() {
                   )}
                 </div>
               </div>
-            <HLSVideoPlayer setIsLive={setIsLive} url={`${process.env.VITE_STREAMING_SERVER_URL}/watch/${user?.principal_id}/index.m3u8`}/>
+              <HLSVideoPlayer
+                setIsLive={setIsLive}
+                url={`${process.env.VITE_STREAMING_SERVER_URL}/watch/${user?.principal_id}/index.m3u8`}
+              />
 
               <div className="border-t border-white/10 px-4 py-3">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -376,14 +407,13 @@ export default function Stream() {
                   </button>
                 </form>
               </div>
-
             </div>
           </motion.aside>
         </section>
       </main>
 
       <Footer />
-    </div >
+    </div>
   );
 }
 

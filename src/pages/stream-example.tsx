@@ -1,7 +1,7 @@
-import { useParams } from "react-router-dom";
-import { useUserProfile } from "../services/userProfileService";
-import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useUserProfile } from '../services/user-profile.service';
 
 export default function StreamExample() {
   const { streamerId } = useParams();
@@ -44,21 +44,22 @@ export default function StreamExample() {
 
   return (
     <div className="p-4 text-white bg-[#0A0E17] min-h-screen">
-      <h1 className="text-2xl font-bold">{user.username || "No name"}</h1>
+      <h1 className="text-2xl font-bold">{user.username || 'No name'}</h1>
 
       <h2 className="mt-4 text-xl">Stats</h2>
       <p>Followers: {stats.followersCount}</p>
       <p>Following: {stats.followingCount}</p>
-      <p>{isOwnProfile ? "This is your profile" : "Viewing another user"}</p>
+      <p>{isOwnProfile ? 'This is your profile' : 'Viewing another user'}</p>
       <p>
         {isFollowingLoading ? (
           <span className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" /> Checking follow status...
+            <Loader2 className="h-4 w-4 animate-spin" /> Checking follow
+            status...
           </span>
         ) : isFollowing ? (
-          "You are following this user"
+          'You are following this user'
         ) : (
-          "You are not following this user"
+          'You are not following this user'
         )}
       </p>
 

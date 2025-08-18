@@ -15,34 +15,42 @@ import {
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useUserProfile } from '../services/userProfileService';
 import { useAuth } from '../contexts/auth.context';
-import { StreamHistory } from "../interfaces/stream-history";
-import { getAllStreamHistory } from "../services/stream-history.service";
+import { StreamHistory } from '../interfaces/stream-history';
+import { getAllStreamHistory } from '../services/stream-history.service';
 import Loading from './Loading';
-import { useFollowing } from "../services/followService";
-import { render } from "@testing-library/react";
+import { render } from '@testing-library/react';
+import { useFollowing } from '../services/follow.service';
+import { useUserProfile } from '../services/user-profile.service';
 
 export default function Profile() {
   const { principalId } = useParams();
-  const { stats, user, isProfileLoaded, isLoading, isOwnProfile } = useUserProfile(principalId);
+  const { stats, user, isProfileLoaded, isLoading, isOwnProfile } =
+    useUserProfile(principalId);
   const [streamHistory, setStreamHistory] = useState<StreamHistory[]>([]);
-  const { isFollowing, handleFollow, handleUnfollow, checkFollowingStatus, followLoading, unfollowLoading } = useFollowing();
+  const {
+    isFollowing,
+    handleFollow,
+    handleUnfollow,
+    checkFollowingStatus,
+    followLoading,
+    unfollowLoading,
+  } = useFollowing();
   const [activeTab, setActiveTab] = useState<
     'videos' | 'clips' | 'about' | 'schedule'
   >('videos');
 
   useEffect(() => {
     if (user) {
-      getAllStreamHistory(user.principal_id).then(history => setStreamHistory(history));
+      getAllStreamHistory(user.principal_id).then((history) =>
+        setStreamHistory(history),
+      );
       checkFollowingStatus(user.principal_id);
     }
   }, [user]);
 
   if (isLoading || !isProfileLoaded) {
-    return (
-      <Loading />
-    );
+    return <Loading />;
   }
 
   const displayName = user?.username || 'Your Name';
@@ -134,15 +142,24 @@ export default function Profile() {
                       <PlayCircle className="h-4 w-4" />
                       Watch Live
                     </button>
-                    {!isOwnProfile && (isFollowing ?
-                      <button className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleUnfollow(principalId!)} disabled={unfollowLoading}>
-                        Unfollow
-                      </button>
-                      :
-                      <button className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer" onClick={() => handleFollow(principalId!)} disabled={followLoading}>
-                        Follow
-                      </button>
-                    )}
+                    {!isOwnProfile &&
+                      (isFollowing ? (
+                        <button
+                          className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
+                          onClick={() => handleUnfollow(principalId!)}
+                          disabled={unfollowLoading}
+                        >
+                          Unfollow
+                        </button>
+                      ) : (
+                        <button
+                          className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
+                          onClick={() => handleFollow(principalId!)}
+                          disabled={followLoading}
+                        >
+                          Follow
+                        </button>
+                      ))}
                     <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
                       <Crown className="h-4 w-4" />
                       Subscribe
@@ -247,10 +264,11 @@ export default function Profile() {
                   <button
                     key={t.key}
                     onClick={() => setActiveTab(t.key as typeof activeTab)}
-                    className={`rounded-full border px-3 py-1.5 text-xs ${activeTab === t.key
-                      ? 'border-white/20 bg-white/10 font-semibold'
-                      : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
-                      }`}
+                    className={`rounded-full border px-3 py-1.5 text-xs ${
+                      activeTab === t.key
+                        ? 'border-white/20 bg-white/10 font-semibold'
+                        : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
+                    }`}
                   >
                     {t.label}
                   </button>
@@ -278,7 +296,9 @@ export default function Profile() {
                             {v.categoryName}
                           </div>
                           <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {new Date(v.duration * 1000).toISOString().slice(11, 19)}
+                            {new Date(v.duration * 1000)
+                              .toISOString()
+                              .slice(11, 19)}
                           </div>
                         </div>
                         <div className="p-3">

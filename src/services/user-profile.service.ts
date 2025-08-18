@@ -8,7 +8,10 @@ import {
 } from '../interfaces/motoko-result';
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/auth.context';
-import { FollowersInterface, FollowingInterface } from '../interfaces/following';
+import {
+  FollowersInterface,
+  FollowingInterface,
+} from '../interfaces/following';
 
 export function useUserProfile(targetPrincipal?: string) {
   const { principal } = useAuth();
@@ -22,7 +25,7 @@ export function useUserProfile(targetPrincipal?: string) {
     args: [profilePrincipal || ''],
     refetchOnMount: false,
   });
-  
+
   const { data: followersCountData, call: fetchFollowersCount } = useQueryCall({
     functionName: 'getFollowersCount',
     args: [profilePrincipal || ''],
@@ -47,7 +50,11 @@ export function useUserProfile(targetPrincipal?: string) {
     refetchOnMount: false,
   });
 
-  const { data: isFollowingData, loading: isFollowingLoading, call: fetchIsFollowing } = useQueryCall({
+  const {
+    data: isFollowingData,
+    loading: isFollowingLoading,
+    call: fetchIsFollowing,
+  } = useQueryCall({
     functionName: 'isFollowing',
     args: [principal || '', profilePrincipal || ''],
     refetchOnMount: false,
@@ -60,13 +67,19 @@ export function useUserProfile(targetPrincipal?: string) {
   };
 
   const getFollowersCount = (): number => {
-    const result = followersCountData as MotokoResult<bigint, string> | null | undefined;
+    const result = followersCountData as
+      | MotokoResult<bigint, string>
+      | null
+      | undefined;
     if (!isOkResult(result)) return 0;
     return Number(result.ok);
   };
 
   const getFollowingCount = (): number => {
-    const result = followingCountData as MotokoResult<bigint, string> | null | undefined;
+    const result = followingCountData as
+      | MotokoResult<bigint, string>
+      | null
+      | undefined;
     if (!isOkResult(result)) return 0;
     return Number(result.ok);
   };
@@ -76,19 +89,25 @@ export function useUserProfile(targetPrincipal?: string) {
       | MotokoResult<boolean, string>
       | null
       | undefined;
-      console.log(result)
+    console.log(result);
     if (!isOkResult(result)) return false;
     return result.ok;
   };
 
   const getFollowingList = (): FollowingInterface[] => {
-    const result = followingListData as MotokoResult<FollowingInterface[], string> | null | undefined;
+    const result = followingListData as
+      | MotokoResult<FollowingInterface[], string>
+      | null
+      | undefined;
     if (!isOkResult(result)) return [];
     return result.ok;
   };
 
   const getFollowersList = (): FollowersInterface[] => {
-    const result = followersListData as MotokoResult<FollowersInterface[], string> | null | undefined;
+    const result = followersListData as
+      | MotokoResult<FollowersInterface[], string>
+      | null
+      | undefined;
     if (!isOkResult(result)) return [];
     return result.ok;
   };
@@ -105,8 +124,14 @@ export function useUserProfile(targetPrincipal?: string) {
   };
 
   const getStatsError = (): string | null => {
-    const followersResult = followersCountData as MotokoResult<bigint, string> | null | undefined;
-    const followingResult = followingCountData as MotokoResult<bigint, string> | null | undefined;
+    const followersResult = followersCountData as
+      | MotokoResult<bigint, string>
+      | null
+      | undefined;
+    const followingResult = followingCountData as
+      | MotokoResult<bigint, string>
+      | null
+      | undefined;
 
     if (isErrResult(followersResult)) return followersResult.err;
     if (isErrResult(followingResult)) return followingResult.err;
@@ -129,7 +154,14 @@ export function useUserProfile(targetPrincipal?: string) {
         setIsLoading(false);
       }
     },
-    [fetchUser, fetchFollowersCount, fetchFollowingCount, fetchFollowingList, fetchFollowersList, principal],
+    [
+      fetchUser,
+      fetchFollowersCount,
+      fetchFollowingCount,
+      fetchFollowingList,
+      fetchFollowersList,
+      principal,
+    ],
   );
 
   const isOwnProfile = principal === profilePrincipal;
@@ -159,7 +191,7 @@ export function useUserProfile(targetPrincipal?: string) {
     stats: getUserStats(),
     followingList: getFollowingList(),
     followersList: getFollowersList(),
-    isFollowing : getIsFollowing(),
+    isFollowing: getIsFollowing(),
 
     isFollowingLoading,
 
