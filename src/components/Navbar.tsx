@@ -19,12 +19,19 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [hasAttemptedLogin, setHasAttemptedLogin] = useState(false);
 
   const menuRef = useRef<HTMLDivElement | null>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
 
-  const { isConnected, principal, user, isConnecting, handleRegister, handleDisconnect, registerLoading } = useAuth(); 
+  const {
+    isConnected,
+    principal,
+    user,
+    isConnecting,
+    handleRegister,
+    handleDisconnect,
+    registerLoading,
+  } = useAuth();
 
   useEffect(() => {
     const onPointerDown = (e: PointerEvent) => {
@@ -74,8 +81,18 @@ export default function Navbar() {
           className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 hover:bg-white/10 cursor-pointer"
         >
           <div className="flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-sky-500 to-blue-600">
-              <User className="h-4 w-4" />
+            <div className="relative h-7 w-7 rounded-full overflow-hidden">
+              {user.profile_picture ? (
+                <img
+                  src={user.profile_picture}
+                  alt={user.username || 'User avatar'}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center text-xs font-medium text-white">
+                  {user.username?.[0]?.toUpperCase() || 'U'}
+                </span>
+              )}
             </div>
             <span className="text-sm text-white/90">{user.username}</span>
           </div>
@@ -128,12 +145,21 @@ export default function Navbar() {
   };
 
   const renderUserStatus = () => {
-    if (!isConnected) return <>
-      <ConnectButton>Connect Wallet</ConnectButton> <ConnectDialog />
-    </> 
-    if (isConnecting) return <>
-                <Loader2 className="w-5 h-5 animate-spin text-blue-600" /> <span className="text-blue-600 font-medium">Connecting wallet...</span>
-    </>
+    if (!isConnected)
+      return (
+        <>
+          <ConnectButton>Connect Wallet</ConnectButton> <ConnectDialog />
+        </>
+      );
+    if (isConnecting)
+      return (
+        <>
+          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />{' '}
+          <span className="text-blue-600 font-medium">
+            Connecting wallet...
+          </span>
+        </>
+      );
     if (user) return <ProfileDropdown />;
     return (
       <div className="flex items-center gap-3">

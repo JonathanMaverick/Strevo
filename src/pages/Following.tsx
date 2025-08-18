@@ -11,7 +11,6 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useFollowing } from '../services/followService';
 
 type Channel = {
   name: string;
@@ -23,8 +22,6 @@ type Channel = {
 };
 
 export default function Following() {
-  const {} = useFollowing();
-
   const [activeTab, setActiveTab] = useState<
     'live' | 'offline' | 'recommended'
   >('live');

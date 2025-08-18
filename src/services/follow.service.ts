@@ -1,7 +1,10 @@
 import { useQueryCall, useUpdateCall } from '@ic-reactor/react';
 import { useConnect } from '@connect2ic/react';
 import { User } from '../interfaces/user';
-import { FollowersInterface, FollowingInterface } from '../interfaces/following';
+import {
+  FollowersInterface,
+  FollowingInterface,
+} from '../interfaces/following';
 import {
   isErrResult,
   isOkResult,
@@ -11,7 +14,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '../contexts/auth.context';
 
 export function useFollowing() {
-  const {principal} = useAuth();
+  const { principal } = useAuth();
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
 
   const {
@@ -201,9 +204,9 @@ export function useFollowing() {
   };
 
   const checkFollowingStatus = async (targetPrincipal: string) => {
-    console.log(principal)
+    console.log(principal);
     if (!principal) return false;
-    console.log(principal, targetPrincipal)
+    console.log(principal, targetPrincipal);
     setSelectedUser(targetPrincipal);
     await checkIsFollowing([principal, targetPrincipal]);
     return getIsFollowing();

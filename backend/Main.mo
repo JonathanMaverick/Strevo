@@ -24,10 +24,31 @@ persistent actor Main {
             };
         }
     };
+
+    private func isUsernameExists(username: Text, excludePrincipalId: ?Text) : Bool {
+        for ((principalId, user) in tree.entries()) {
+            switch(excludePrincipalId) {
+                case null {
+                    if (user.username == username) {
+                        return true;
+                    };
+                };
+                case (?excludeId) {
+                    if (user.username == username and principalId != excludeId) {
+                        return true;
+                    };
+                };
+            }
+        };
+        false
+    };
     
     public func register(principal_id: Text, userData: User.User) : async Result.Result<User.User, Text> {
         switch(tree.get(principal_id)) {
             case null {
+                if (isUsernameExists(userData.username, null)) {
+                    return #err("Username already exists");
+                };
                 let newUser : User.User = {
                     principal_id = userData.principal_id;
                     username = userData.username;
@@ -52,6 +73,28 @@ persistent actor Main {
             case (?_) {
                 tree.delete(principal_id);
                 #ok("User deleted successfully")
+            };
+        }
+    };
+
+    public func updateUser(principal_id: Text, updatedData: User.User) : async Result.Result<User.User, Text> {
+        switch(tree.get(principal_id)) {
+            case null {
+                #err("User not found")
+            };
+            case (?existingUser) {
+                if (isUsernameExists(updatedData.username, null)) {
+                    return #err("Username already exists");
+                };
+                let updatedUser : User.User = {
+                    principal_id = existingUser.principal_id; 
+                    username = updatedData.username;
+                    profile_picture = updatedData.profile_picture;
+                    created_at = existingUser.created_at; 
+                    streaming_key = existingUser.streaming_key;
+                };
+                tree.put(principal_id, updatedUser);
+                #ok(updatedUser)
             };
         }
     };

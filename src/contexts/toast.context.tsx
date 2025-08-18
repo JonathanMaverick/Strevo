@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 type ToastContextType = {
   showToast: (component: ReactNode, duration?: number) => void;
@@ -21,14 +21,14 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
       {toast && (
         <div
           style={{
-            position: "fixed",
-            bottom: "20px",
-            right: "20px",
-            background: "white",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            boxShadow: "0px 2px 8px rgba(0,0,0,0.15)",
-            zIndex: 9999
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            background: 'white',
+            padding: '10px 20px',
+            borderRadius: '8px',
+            boxShadow: '0px 2px 8px rgba(0,0,0,0.15)',
+            zIndex: 9999,
           }}
         >
           {toast}
@@ -40,6 +40,6 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 
 export const useToast = () => {
   const context = useContext(ToastContext);
-  if (!context) throw new Error("useToast must be used within a ToastProvider");
+  if (!context) throw new Error('useToast must be used within a ToastProvider');
   return context;
 };

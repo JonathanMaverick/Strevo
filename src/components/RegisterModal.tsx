@@ -3,7 +3,7 @@ import { useState } from 'react';
 import {
   buildSupabasePublicUrl,
   uploadDirectToSupabaseS3,
-} from '../services/storageService';
+} from '../services/storage.service';
 
 type Props = {
   open: boolean;
@@ -13,7 +13,7 @@ type Props = {
     profile_picture: string;
   }) => Promise<void>;
   supabaseUrl: string;
-  registerLoading: boolean
+  registerLoading: boolean;
 };
 
 export default function RegisterModal({
@@ -102,7 +102,9 @@ export default function RegisterModal({
               )}
             </div>
             <div className="flex items-center gap-3">
-              <label className={`inline-flex cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10 ${registerLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <label
+                className={`inline-flex cursor-pointer rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90 hover:bg-white/10 ${registerLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
                 <input
                   type="file"
                   accept="image/*"

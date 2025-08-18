@@ -4,19 +4,14 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Users, ArrowLeft } from 'lucide-react';
-import { useUserProfile } from '../services/userProfileService';
 import { FollowersInterface } from '../interfaces/following';
+import { useUserProfile } from '../services/user-profile.service';
 
 export default function FollowersPage() {
   const { principalId } = useParams();
   const navigate = useNavigate();
-  const {
-    user,
-    stats,
-    followersList,
-    isLoading,
-    loadProfile,
-  } = useUserProfile(principalId);
+  const { user, stats, followersList, isLoading, loadProfile } =
+    useUserProfile(principalId);
 
   useEffect(() => {
     if (principalId) loadProfile(principalId);
@@ -41,10 +36,8 @@ export default function FollowersPage() {
     );
   };
 
-  const getPrincipal = (u: FollowersInterface) =>
-    u.principal_id;
-  const getName = (u: FollowersInterface) =>
-    u?.followers.username; 
+  const getPrincipal = (u: FollowersInterface) => u.principal_id;
+  const getName = (u: FollowersInterface) => u?.followers.username;
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">

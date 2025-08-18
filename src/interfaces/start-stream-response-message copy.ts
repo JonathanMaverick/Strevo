@@ -1,5 +1,4 @@
-
 export interface StartStreamResponseMessage {
-    streamerId: string;
-    streamId: string;
+  streamerId: string;
+  streamId: string;
 }
