@@ -29,6 +29,15 @@ function App() {
       new InfinityWallet(),
       new StoicWallet(),
     ],
+    globalProviderConfig: {
+      dev: process.env.NODE_ENV !== 'production',
+      host:
+        process.env.NODE_ENV === 'production'
+          ? 'https://ic0.app'
+          : 'http://localhost:4943',
+      autoConnect: false,
+      whitelist: [process.env.CANISTER_ID_BACKEND!, process.env.CANISTER_ID_FRONTEND!],
+    },
   });
 
   return (

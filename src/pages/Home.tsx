@@ -5,8 +5,8 @@ import Footer from '../components/Footer';
 import { SocketMessageType } from '../enums/socket-message-type';
 import { ChatMessage } from '../interfaces/chat-message';
 import { SocketMessage } from '../interfaces/socket-message';
-import { Stream } from "../interfaces/stream";
-import { getAllActiveStream } from "../services/stream.service";
+import { Stream } from '../interfaces/stream';
+import { getAllActiveStream } from '../services/stream.service';
 
 export default function Home() {
   const socketRef = useRef<WebSocket>(null!);
@@ -120,9 +120,9 @@ export default function Home() {
       }
     };
 
-    getAllActiveStream().then(streams => {
+    getAllActiveStream().then((streams) => {
       if (streams) setActiveStreams(streams);
-    })
+    });
 
     return () => {
       socketRef.current.close();
@@ -339,10 +339,7 @@ export default function Home() {
               href="#"
               className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
             >
-              <div
-                className={`relative aspect-video w-full bg-gradient-to-br`}
-              >
-
+              <div className={`relative aspect-video w-full bg-gradient-to-br`}>
                 <img
                   src={stream.thumbnail}
                   alt={stream.title}
@@ -360,8 +357,12 @@ export default function Home() {
                 </div>
               </div>
               <div className="p-3">
-                <p className="line-clamp-1 text-sm font-medium">{stream.title}</p>
-                <p className="mt-1 text-xs text-white/60">{stream.hostPrincipalID}</p>
+                <p className="line-clamp-1 text-sm font-medium">
+                  {stream.title}
+                </p>
+                <p className="mt-1 text-xs text-white/60">
+                  {stream.hostPrincipalID}
+                </p>
               </div>
             </a>
           ))}

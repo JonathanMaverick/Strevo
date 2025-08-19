@@ -1,5 +1,4 @@
 import { useQueryCall, useUpdateCall } from '@ic-reactor/react';
-import { useConnect } from '@connect2ic/react';
 import { User } from '../interfaces/user';
 import {
   FollowersInterface,

@@ -42,9 +42,11 @@ export default function Profile() {
 
   useEffect(() => {
     if (user) {
-      getAllStreamHistory(user.principal_id).then((history) =>
-        setStreamHistory(history),
-      );
+      getAllStreamHistory(user.principal_id).then((history) => {
+        if (history) {
+          setStreamHistory(history);
+        }
+      });
       checkFollowingStatus(user.principal_id);
     }
   }, [user]);
