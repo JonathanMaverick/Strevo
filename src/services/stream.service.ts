@@ -16,6 +16,20 @@ export async function getAllActiveStream(): Promise<Stream[] | undefined> {
   }
 }
 
+export async function getStreamByStreamerID(hostPrincipalId: string) {
+  try {
+    const response = await axios.get(`${ENDPOINT}/by-streamer-id?streamerID=${hostPrincipalId}`);
+    if (response.status !== HttpStatusCode.Ok) {
+      return undefined;
+    }
+
+    return response.data.data;
+  } catch (error) {
+    return undefined;
+  }
+
+}
+
 export async function createStream(payload: StreamFormData) {
   try {
     const res = await axios.post(`${ENDPOINT}/create-stream`, payload);

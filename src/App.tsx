@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Following from './pages/Following';
-import Stream from './pages/Stream';
+import StreamPage from './pages/Stream';
 
 import '@connect2ic/core/style.css';
 import { createClient } from '@connect2ic/core';
@@ -57,7 +57,7 @@ function App() {
                 <Route path="/following" element={<Following />} />
                 <Route path="/start-stream" element={<StartStream />} />
                 <Route path="/edit-stream-info" element={<EditStreamInfo />} />
-                <Route path="/stream/:principalId" element={<Stream />} />
+                <Route path="/stream/:principalId" element={<StreamPage />} />
                 <Route
                   path="/stream-history/:streamHistoryId"
                   element={<StreamHistoryPage />}

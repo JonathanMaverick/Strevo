@@ -45,6 +45,8 @@ import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { useUserProfile } from '../services/user-profile.service';
 import { useFollowing } from '../services/follow.service';
 import Loading from './Loading';
+import { Stream } from "../interfaces/stream";
+import { getStreamByStreamerID } from "../services/stream.service";
 
 const QUALITY_OPTIONS = [
   { label: '1080p', value: '1080p' },
@@ -62,7 +64,7 @@ const formatViewerCount = (count: number) => {
   return count.toString();
 };
 
-export default function Stream() {
+export default function StreamPage() {
   const { principalId } = useParams();
   const { user, loadProfile, isProfileLoaded, isOwnProfile } =
     useUserProfile(principalId);
@@ -82,6 +84,7 @@ export default function Stream() {
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const messageInputRef = useRef<HTMLInputElement>(null!);
   const [viewerCount, setViewerCount] = useState(0);
+  const [stream, setStream] = useState<Stream | undefined>();
 
   const handleIncomingMessage = (data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data]);
@@ -115,6 +118,9 @@ export default function Stream() {
     }
     loadProfile(principalId);
     checkFollowingStatus(principalId);
+    getStreamByStreamerID(principalId).then((stream) => {
+      if (stream) setStream(stream);
+    })
 
     socketRef.current = new WebSocket(
       `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`,
@@ -259,7 +265,7 @@ export default function Stream() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="min-w-0">
                     <p className="line-clamp-1 text-sm font-semibold">
-                      Pro scrims — finals practice
+                      {stream?.title}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

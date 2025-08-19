@@ -193,7 +193,7 @@ export default function StreamHistoryPage() {
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="min-w-0">
                     <p className="line-clamp-1 text-sm font-semibold">
-                      Pro scrims — finals practice
+                      {streamHistory.title}
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-2">

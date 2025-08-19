@@ -281,7 +281,7 @@ export default function Profile() {
               <div className="mt-4">
                 {activeTab === 'videos' && (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {streamHistory.map((v, i) => (
+                    {streamHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((v, i) => (
                       <a
                         key={i}
                         href={`/stream-history/${v.streamHistoryID}`}
