@@ -56,6 +56,7 @@ export default function Profile() {
   }
 
   const displayName = user?.username || 'Your Name';
+  const bio = user?.bio || "Tell a world about yourself!"
   const avatarUrl =
     user?.profile_picture ||
     `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((displayName?.[0] || 'U').toUpperCase()))}`;
@@ -137,7 +138,7 @@ export default function Profile() {
                     <h1 className="text-xl font-semibold leading-tight">
                       {displayName}
                     </h1>
-                    <p className="mt-1 text-sm text-white/70">—</p>
+                    <p className="mt-1 text-sm text-white/70">{bio}</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2 sm:mt-0">
                     <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
