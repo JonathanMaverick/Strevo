@@ -4,7 +4,7 @@ export interface Stream {
   streamId: string;
   hostPrincipalID: string;
   title: string;
-  thumbnail: string;
+  thumbnailURL: string;
   categoryName: string;
   isActive: string;
   createdAt: string;

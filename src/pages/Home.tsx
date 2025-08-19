@@ -336,12 +336,12 @@ export default function Home() {
           {activeStreams.map((stream, i) => (
             <a
               key={i}
-              href="#"
+              href={`/stream/${stream.hostPrincipalID}`}
               className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
             >
               <div className={`relative aspect-video w-full bg-gradient-to-br`}>
                 <img
-                  src={stream.thumbnail}
+                  src={stream.thumbnailURL}
                   alt={stream.title}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
