@@ -3,6 +3,7 @@ export interface User {
   username: string;
   profile_picture: string;
   streaming_key: string;
+  bio?: string;
   created_at?: number;
 }
 

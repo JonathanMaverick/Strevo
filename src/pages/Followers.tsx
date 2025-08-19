@@ -62,14 +62,14 @@ export default function FollowersPage() {
           </button>
           {principalId ? (
             <Link
-              to={`/profile/${principalId}`}
+              to={`/profiles/${principalId}`}
               className="text-xs text-sky-400 hover:text-sky-300"
             >
               View Profile
             </Link>
           ) : (
             <Link
-              to="/profile"
+              to="/profiles"
               className="text-xs text-sky-400 hover:text-sky-300"
             >
               View Profile
@@ -98,13 +98,13 @@ export default function FollowersPage() {
               {principalId ? (
                 <>
                   <Link
-                    to={`/profile/${principalId}/followers`}
+                    to={`/profiles/${principalId}/followers`}
                     className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold"
                   >
                     Followers
                   </Link>
                   <Link
-                    to={`/profile/${principalId}/following`}
+                    to={`/profiles/${principalId}/following`}
                     className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white"
                   >
                     Following

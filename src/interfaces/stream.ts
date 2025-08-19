@@ -11,3 +11,9 @@ export interface Stream {
   messages: StreamMessage[];
   viewerCount: number;
 }
+
+export interface StreamFormData {
+  hostPrincipalId: string;
+  title: string;
+  streamCategoryId: string;
+}

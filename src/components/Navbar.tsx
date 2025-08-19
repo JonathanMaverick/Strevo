@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   Loader2,
+  SquarePen,
 } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
@@ -116,6 +117,15 @@ export default function Navbar() {
             >
               <User className="h-4 w-4" />
               My Profile
+            </Link>
+            <Link
+              to="/edit-stream-info"
+              role="menuitem"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+            >
+              <SquarePen className="h-4 w-4" />
+              Edit Stream Info
             </Link>
             <Link
               to="/settings"
@@ -276,12 +286,20 @@ export default function Navbar() {
                       </div>
                       <div className="flex flex-col gap-2">
                         <Link
-                          to="/profile"
+                          to="/profiles"
                           onClick={() => setMobileOpen(false)}
                           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
                         >
                           <User className="h-4 w-4" />
                           My Profile
+                        </Link>
+                        <Link
+                          to="/edit-stream-info"
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+                        >
+                          <SquarePen className="h-4 w-4" />
+                          Edit Stream Info
                         </Link>
                         <Link
                           to="/settings"

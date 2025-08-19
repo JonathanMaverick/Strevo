@@ -1,13 +1,11 @@
 import { useEffect, useMemo, useRef, useState, FormEvent } from 'react';
-import { motion, time } from 'framer-motion';
-import { Loader2, Check } from 'lucide-react';
-import { useUpdateCall } from '@ic-reactor/react';
-import AvatarUploader from './AvatarUploader';
+import { motion } from 'framer-motion';
+import { useUpdateUserService } from '../../services/user.service';
 import {
   uploadDirectToSupabaseS3,
   buildSupabasePublicUrl,
 } from '../../services/storage.service';
-import { useUpdateUserService } from '../../services/user.service';
+import AvatarUploader from './AvatarUploader';
 import ErrorMessage from './ErrorMessage';
 import PreviewCard from './PreviewCard';
 import { User } from '../../interfaces/user';
@@ -16,6 +14,7 @@ export default function SettingsForm({ user }: { user: User }) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
 
   const [displayName, setDisplayName] = useState('');
+  const [bio, setBio] = useState('');
   const [currentAvatar, setCurrentAvatar] = useState<string | undefined>();
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -29,14 +28,16 @@ export default function SettingsForm({ user }: { user: User }) {
   useEffect(() => {
     if (!user) return;
     setDisplayName((prev) => prev || user.username || '');
+    setBio((prev) => prev || user.bio || '');
     setCurrentAvatar(user.profile_picture || undefined);
   }, [user]);
 
   const hasChanges = useMemo(() => {
     const nameChanged = displayName.trim() !== (user.username || '');
+    const bioChanged = bio.trim() !== (user.bio || '');
     const avatarChanged = !!selectedFile;
-    return nameChanged || avatarChanged;
-  }, [displayName, user, selectedFile]);
+    return nameChanged || bioChanged || avatarChanged;
+  }, [displayName, bio, user, selectedFile]);
 
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -60,10 +61,11 @@ export default function SettingsForm({ user }: { user: User }) {
 
       const payload: User = {
         username: displayName.trim(),
+        bio: bio.trim(),
         profile_picture: finalAvatarUrl || '',
         principal_id: user.principal_id,
         streaming_key: user.streaming_key,
-        created_at: 1,
+        created_at: user.created_at,
       };
       await updateUserCall([payload.principal_id, payload]);
       setPreviewUrl(null);
@@ -87,7 +89,7 @@ export default function SettingsForm({ user }: { user: User }) {
       <div className="border-b border-white/10 px-5 py-4 sm:px-6">
         <h1 className="text-lg font-semibold tracking-tight">Settings</h1>
         <p className="mt-1 text-xs text-white/60">
-          Update your display name and profile picture.
+          Update your display name, bio, and profile picture.
         </p>
       </div>
 
@@ -104,12 +106,19 @@ export default function SettingsForm({ user }: { user: User }) {
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Your display name"
-              maxLength={40}
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
             />
-            <div className="mt-1 text-[10px] text-white/50">
-              {displayName.length}/40
-            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-medium text-white/80">Bio</label>
+            <textarea
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Tell us about yourself..."
+              rows={3}
+              className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
+            />
           </div>
 
           <AvatarUploader

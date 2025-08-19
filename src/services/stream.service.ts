@@ -1,5 +1,5 @@
 import axios, { HttpStatusCode } from 'axios';
-import { Stream } from '../interfaces/stream';
+import { Stream, StreamFormData } from '../interfaces/stream';
 
 const ENDPOINT = `http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/streams`;
 
@@ -12,6 +12,20 @@ export async function getAllActiveStream(): Promise<Stream[] | undefined> {
 
     return response.data.data;
   } catch (error) {
+    return undefined;
+  }
+}
+
+export async function createStream(payload: StreamFormData) {
+  try {
+    const res = await axios.post(`${ENDPOINT}/create-stream`, payload);
+    if (
+      res.status !== HttpStatusCode.Ok &&
+      res.status !== HttpStatusCode.Created
+    )
+      return undefined;
+    return res.data?.data;
+  } catch {
     return undefined;
   }
 }

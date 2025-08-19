@@ -36,7 +36,6 @@ export default function PreviewCard({
             <div className="text-sm font-medium">
               {displayName || user?.username || 'Your name'}
             </div>
-            <div className="text-[11px] text-white/50">Public profile</div>
           </div>
         </div>
         <button
@@ -60,9 +59,6 @@ export default function PreviewCard({
               ? 'Saving…'
               : 'Save changes'}
         </button>
-        <div className="text-[10px] text-white/50">
-          Changes may take a moment to appear across the site.
-        </div>
       </div>
     </div>
   );

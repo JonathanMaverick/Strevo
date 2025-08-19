@@ -20,6 +20,7 @@ import Followers from './pages/Followers';
 import { AuthProvider } from './contexts/auth.context';
 import StreamExample from './pages/stream-example';
 import StreamHistoryPage from './pages/StreamHistory';
+import EditStreamInfo from './pages/EditStreamInfo';
 
 function App() {
   const client = createClient({
@@ -36,7 +37,10 @@ function App() {
           ? 'https://ic0.app'
           : 'http://localhost:4943',
       autoConnect: false,
-      whitelist: [process.env.CANISTER_ID_BACKEND!, process.env.CANISTER_ID_FRONTEND!],
+      whitelist: [
+        process.env.CANISTER_ID_BACKEND!,
+        process.env.CANISTER_ID_FRONTEND!,
+      ],
     },
   });
 
@@ -50,6 +54,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/profiles/:principalId" element={<Profile />} />
                 <Route path="/following" element={<Following />} />
+                <Route path="/edit-stream-info" element={<EditStreamInfo />} />
                 <Route path="/stream/:principalId" element={<Stream />} />
                 <Route
                   path="/stream-history/:streamHistoryId"
@@ -61,7 +66,7 @@ function App() {
                 />
                 <Route path="/settings" element={<Settings />} />
                 <Route
-                  path="/profile/:principalId/followers"
+                  path="/profiles/:principalId/followers"
                   element={<Followers />}
                 />
               </Routes>
