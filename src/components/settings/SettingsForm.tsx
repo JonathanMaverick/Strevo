@@ -34,7 +34,7 @@ export default function SettingsForm({ user }: { user: User }) {
 
   const hasChanges = useMemo(() => {
     const nameChanged = displayName.trim() !== (user.username || '');
-    const bioChanged = bio.trim() !== (user.bio || '');
+    const bioChanged = bio !== user.bio;
     const avatarChanged = !!selectedFile;
     return nameChanged || bioChanged || avatarChanged;
   }, [displayName, bio, user, selectedFile]);
@@ -59,9 +59,9 @@ export default function SettingsForm({ user }: { user: User }) {
         });
       }
 
-      const payload: User = {
+      const payload = {
         username: displayName.trim(),
-        bio: bio.trim(),
+        bio: bio && bio.trim() !== '' ? [bio.trim()] : [],
         profile_picture: finalAvatarUrl || '',
         principal_id: user.principal_id,
         streaming_key: user.streaming_key,
