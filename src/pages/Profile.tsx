@@ -67,7 +67,7 @@ export default function Profile() {
       : '—';
 
   const followersHref = user?.principal_id
-    ? `/profile/${user.principal_id}/followers`
+    ? `/profiles/${user.principal_id}/followers`
     : `/followers`;
 
   const statsCards = [
