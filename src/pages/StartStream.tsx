@@ -14,11 +14,13 @@ import {
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/auth.context';
+import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 
 export default function StartStream() {
   const { user } = useAuth();
   const [copied, setCopied] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
+  const [isLive, setIsLive] = useState(false);
 
   const handleCopy = (value: string, label: string) => {
     navigator.clipboard.writeText(value);
@@ -27,6 +29,8 @@ export default function StartStream() {
   };
 
   const serverUrl = 'rtmp://localhost:1935/live';
+  const hlsBase = import.meta.env.VITE_STREAMING_SERVER_URL as string;
+  const hlsUrl = user ? `${hlsBase}/watch/${user.principal_id}/index.m3u8` : '';
 
   if (!user) {
     return (
@@ -268,19 +272,19 @@ export default function StartStream() {
                   {[
                     {
                       q: 'OBS says it cannot connect to the server',
-                      a: 'Ensure your RTMP server is running locally and not blocked by a firewall. Verify the Server value is exactly rtmp://localhost:1935/live and that no other app occupies port 1935.',
+                      a: 'Ensure your RTMP server is running and not blocked by a firewall. Verify the Server value is rtmp://localhost:1935/live and that no other app uses port 1935.',
                     },
                     {
                       q: 'The stream stays offline on ICP Stream',
-                      a: 'Confirm you clicked Start Streaming in OBS with the correct stream key. If you changed your key, update OBS accordingly. Give it a few seconds after starting.',
+                      a: 'Confirm you clicked Start Streaming in OBS with the correct stream key. If the key changed, update OBS. Allow a few seconds after starting.',
                     },
                     {
                       q: 'Video is laggy or buffering',
-                      a: 'Lower your Video Bitrate, use a hardware encoder if available, reduce Output (Scaled) Resolution to 1280×720 and set FPS to 30.',
+                      a: 'Lower the video bitrate, use a hardware encoder, reduce the output resolution to 1280×720, and set FPS to 30.',
                     },
                     {
                       q: 'No audio on the stream',
-                      a: 'Check the Mixer in OBS. Ensure the correct microphone and desktop audio devices are selected and not muted. Increase the audio levels if necessary.',
+                      a: 'Check the OBS Mixer. Ensure the correct microphone and desktop audio devices are selected and not muted. Adjust audio levels if needed.',
                     },
                   ].map((item, idx) => (
                     <div key={idx} className="py-3">
@@ -308,7 +312,7 @@ export default function StartStream() {
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 relative">
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
               <div className="text-sm font-semibold">
                 Your Stream Credentials
               </div>
@@ -352,13 +356,22 @@ export default function StartStream() {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-white/[0.03] overflow-hidden">
-              <div className="px-5 py-4 border-b border-white/10 text-sm font-semibold">
-                Live Preview
-              </div>
-              <div className="aspect-video w-full bg-gradient-to-br from-slate-700 via-slate-800 to-black grid place-items-center">
-                <div className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/70">
-                  Your stream will appear here once you go live
+              <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
+                <div className="text-sm font-semibold">Live Preview</div>
+                <div
+                  className={`rounded-full px-2 py-0.5 text-[11px] ${isLive ? 'bg-green-500/20 text-green-300 border border-green-500/40' : 'bg-white/10 text-white/70 border border-white/15'}`}
+                >
+                  {isLive ? 'Live' : 'Offline'}
                 </div>
+              </div>
+              <div className="aspect-video w-full bg-black">
+                {hlsUrl ? (
+                  <HLSVideoPlayer setIsLive={setIsLive} url={hlsUrl} />
+                ) : (
+                  <div className="h-full w-full grid place-items-center text-xs text-white/60">
+                    Missing stream URL
+                  </div>
+                )}
               </div>
               <div className="px-5 py-3 text-[11px] text-white/60">
                 Start your stream in OBS to see the preview.
