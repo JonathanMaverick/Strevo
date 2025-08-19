@@ -9,6 +9,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getAllCategory, Category } from '../services/category.service';
 import { createStream } from '../services/stream.service';
 import type { StreamFormData } from '../interfaces/stream';
+import { getStreamInfo, saveStreamInfo } from "../services/stream-info.service";
+import { StreamInfo } from "../interfaces/stream-info";
 
 export default function EditStreamInfoForm({
   principalId,
@@ -22,10 +24,15 @@ export default function EditStreamInfoForm({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [title, setTitle] = useState('');
-  const [categoryId, setCategoryId] = useState('');
 
   const triggerRef = useRef<HTMLDivElement>(null);
+  const [streamInfo, setStreamInfo] = useState<StreamInfo>({hostPrincipalId: principalId, title: ""} as StreamInfo);
+
+  useEffect(() => {
+    getStreamInfo(principalId).then(streamInfo => {
+      if (streamInfo) setStreamInfo(streamInfo);
+    })
+  }, [])
 
   useEffect(() => {
     let mounted = true;
@@ -72,25 +79,26 @@ export default function EditStreamInfoForm({
   }, [isDropdownOpen]);
 
   const hasChanges = useMemo(
-    () => !!title.trim() || !!categoryId,
-    [title, categoryId],
+    () => !!streamInfo.title.trim() || !!streamInfo.categoryId,
+    [streamInfo],
   );
   const selected = categories.find(
-    (c: any) => c.categoryID === categoryId || c.CategoryID === categoryId,
+    (c: any) => c.categoryID === streamInfo.categoryId || c.CategoryID === streamInfo.categoryId,
   );
 
   const handleSubmit = async () => {
     setError(null);
     setSuccess(null);
-    if (!title.trim()) return setError('Title is required.');
-    if (!categoryId) return setError('Please select a category.');
-    const payload: StreamFormData = {
-      title: title.trim(),
-      streamCategoryId: categoryId,
-      hostPrincipalId: principalId,
+    console.log('submitting', streamInfo)
+    if (!streamInfo.title.trim()) return setError('Title is required.');
+    if (!streamInfo.categoryId) return setError('Please select a category.');
+    const payload: StreamInfo = {
+      title: streamInfo.title.trim(),
+      categoryId: streamInfo.categoryId,
+      hostPrincipalId: streamInfo.hostPrincipalId,
     };
     setSaving(true);
-    const created = await createStream(payload);
+    const created = await saveStreamInfo(payload);
     setSaving(false);
     if (!created)
       return setError('Failed to save stream info. Please try again.');
@@ -126,8 +134,8 @@ export default function EditStreamInfoForm({
           <div>
             <label className="text-xs font-medium text-white/80">Title</label>
             <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              value={streamInfo.title}
+              onChange={(e) => setStreamInfo(prev => ({...prev, title: e.target.value}))}
               placeholder="Stream Title"
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
               required
@@ -176,10 +184,10 @@ export default function EditStreamInfoForm({
                             key={id}
                             type="button"
                             onClick={() => {
-                              setCategoryId(id);
+                              setStreamInfo(prev => ({...prev, categoryId: id}));
                               setIsDropdownOpen(false);
                             }}
-                            className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${categoryId === id ? 'bg-sky-600/20 text-sky-300' : 'text-white/80'}`}
+                            className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${streamInfo.categoryId === id ? 'bg-sky-600/20 text-sky-300' : 'text-white/80'}`}
                           >
                             {name}
                           </button>

@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Loading from './Loading';
 import Navbar from '../components/Navbar';
 import { Lock } from 'lucide-react';
 import Footer from '../components/Footer';
 import EditStreamInfoForm from '../components/EditStreamInfoForm';
 import { useAuth } from '../contexts/auth.context';
+import { StreamInfo } from "../interfaces/stream-info";
+import { getStreamInfo } from "../services/stream-info.service";
 
 export default function EditStreamInfo() {
   const { user, userLoading } = useAuth();
