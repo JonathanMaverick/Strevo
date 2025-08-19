@@ -11,4 +11,5 @@ export interface UserRegistrationData {
   principal_id?: string | undefined;
   username: string;
   profile_picture: string;
+  bio?: string;
 }

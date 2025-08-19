@@ -110,9 +110,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         setConnectionError(null);
       } else if (!isConnecting) {
         console.log('Clearing effective principal');
-        if(getPrincipalFromStorage()) {
-          setEffectivePrincipal(getPrincipalFromStorage)
-          return
+        if (getPrincipalFromStorage()) {
+          setEffectivePrincipal(getPrincipalFromStorage);
+          return;
         }
         setEffectivePrincipal(null);
       }
@@ -198,6 +198,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       ...registrationData,
       created_at: Date.now(),
       streaming_key: generateStreamingKey(),
+      bio: [],
     };
 
     try {

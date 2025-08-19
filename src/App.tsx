@@ -21,6 +21,7 @@ import { AuthProvider } from './contexts/auth.context';
 import StreamExample from './pages/stream-example';
 import StreamHistoryPage from './pages/StreamHistory';
 import EditStreamInfo from './pages/EditStreamInfo';
+import StartStream from './pages/StartStream';
 
 function App() {
   const client = createClient({
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/profiles/:principalId" element={<Profile />} />
                 <Route path="/following" element={<Following />} />
+                <Route path="/start-stream" element={<StartStream />} />
                 <Route path="/edit-stream-info" element={<EditStreamInfo />} />
                 <Route path="/stream/:principalId" element={<Stream />} />
                 <Route

@@ -44,6 +44,7 @@ import { useAuth } from '../contexts/auth.context';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { useUserProfile } from '../services/user-profile.service';
 import { useFollowing } from '../services/follow.service';
+import Loading from './Loading';
 
 const QUALITY_OPTIONS = [
   { label: '1080p', value: '1080p' },
@@ -152,14 +153,7 @@ export default function Stream() {
   ];
 
   if (!isProfileLoaded) {
-    return (
-      <div className="min-h-screen bg-[#0A0E17] text-white flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading streamer...</span>
-        </div>
-      </div>
-    );
+    return <Loading />;
   }
 
   return (
