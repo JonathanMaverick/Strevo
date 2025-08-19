@@ -196,7 +196,7 @@ export default function EditStreamInfoForm({
             <button
               onClick={handleSubmit}
               disabled={!hasChanges || saving}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-600 px-4 py-3 text-sm font-medium text-white hover:bg-sky-500 disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-2.5 text-sm font-semibold"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

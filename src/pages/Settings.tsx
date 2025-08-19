@@ -81,7 +81,7 @@ export default function Settings() {
 
       <Navbar />
 
-      <section className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <section className="relative mx-auto max-w-5xl px-4 py-10 sm:px-6 min-h-[82vh]">
         <SettingsForm user={user} />
       </section>
 

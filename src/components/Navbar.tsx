@@ -119,6 +119,15 @@ export default function Navbar() {
               My Profile
             </Link>
             <Link
+              to="/start-stream"
+              role="menuitem"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+            >
+              <PlayCircle className="h-4 w-4" />
+              Start Stream
+            </Link>
+            <Link
               to="/edit-stream-info"
               role="menuitem"
               onClick={() => setMenuOpen(false)}
@@ -127,6 +136,7 @@ export default function Navbar() {
               <SquarePen className="h-4 w-4" />
               Edit Stream Info
             </Link>
+
             <Link
               to="/settings"
               role="menuitem"
@@ -218,9 +228,6 @@ export default function Navbar() {
             >
               Following
             </Link>
-            <a href="#" className="text-sm text-white/80 hover:text-white">
-              Esports
-            </a>
           </div>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -294,6 +301,15 @@ export default function Navbar() {
                           My Profile
                         </Link>
                         <Link
+                          to="/start-stream"
+                          role="menuitem"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
+                        >
+                          <PlayCircle className="h-4 w-4" />
+                          Start Stream
+                        </Link>
+                        <Link
                           to="/edit-stream-info"
                           onClick={() => setMobileOpen(false)}
                           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
@@ -301,6 +317,7 @@ export default function Navbar() {
                           <SquarePen className="h-4 w-4" />
                           Edit Stream Info
                         </Link>
+
                         <Link
                           to="/settings"
                           onClick={() => setMobileOpen(false)}
