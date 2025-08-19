@@ -5,6 +5,7 @@ module {
         profile_picture : Text;
         created_at : Int;
         streaming_key: Text;
+        bio : ?Text;
     };
 
     public type Following = {
