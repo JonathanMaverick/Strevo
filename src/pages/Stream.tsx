@@ -6,7 +6,7 @@ import React, {
   useState,
   useCallback,
 } from 'react';
-import { motion } from 'framer-motion';
+import { motion, statsBuffer } from 'framer-motion';
 import {
   Play,
   Pause,
@@ -66,7 +66,7 @@ const formatViewerCount = (count: number) => {
 
 export default function StreamPage() {
   const { principalId } = useParams();
-  const { user, loadProfile, isProfileLoaded, isOwnProfile } =
+  const { stats, user, loadProfile, isProfileLoaded, isOwnProfile } =
     useUserProfile(principalId);
   const { user: currentUser, userLoading } = useAuth();
   const {
@@ -85,6 +85,12 @@ export default function StreamPage() {
   const messageInputRef = useRef<HTMLInputElement>(null!);
   const [viewerCount, setViewerCount] = useState(0);
   const [stream, setStream] = useState<Stream | undefined>();
+  const followersVal =
+    typeof stats?.followersCount === 'number'
+      ? stats.followersCount >= 1000
+        ? `${(stats.followersCount / 1000).toFixed(1)}K`
+        : `${stats.followersCount}`
+      : '—';
 
   const handleIncomingMessage = (data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data]);
@@ -117,7 +123,6 @@ export default function StreamPage() {
       return;
     }
     loadProfile(principalId);
-    checkFollowingStatus(principalId);
     getStreamByStreamerID(principalId).then((stream) => {
       if (stream) setStream(stream);
     })
@@ -141,6 +146,13 @@ export default function StreamPage() {
       socketRef.current?.close();
     };
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      checkFollowingStatus(user.principal_id);
+    }
+
+  }, [user])
 
   const tags = ['FPS', 'Ranked', 'Scrims', 'Coaching', 'Analysis'];
 
@@ -297,23 +309,11 @@ export default function StreamPage() {
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
-                About {user?.username || 'NovaSpectre'}
+                About {user?.username}
               </div>
               <div className="px-4">
                 <div className="rounded-xl bg-gradient-to-r from-sky-500/10 via-blue-600/10 to-indigo-600/10 p-3 text-xs text-white/80">
-                  Competitive FPS streamer & coach. Fokus di scrims, ranked
-                  climb, dan VOD review. DM untuk collab; coaching setiap Kamis
-                  malam.
-                </div>
-                <div className="mt-3 grid gap-2">
-                  <div className="flex items-center gap-2 text-xs text-white/80">
-                    <MapPin className="h-4 w-4 text-white/70" />
-                    Jakarta • WIB (UTC+7)
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-white/80">
-                    <Calendar className="h-4 w-4 text-white/70" />
-                    Live 5×/week • 19:00–23:00
-                  </div>
+                  {user?.bio}
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {tags.map((t) => (
@@ -350,7 +350,7 @@ export default function StreamPage() {
                 <div className="flex items-center justify-between text-xs text-white/80">
                   <span>
                     Followers:{' '}
-                    <span className="text-white/90 font-medium">340K</span>
+                    <span className="text-white/90 font-medium">{followersVal }</span>
                   </span>
                   <span>
                     Subscribers:{' '}

@@ -3,6 +3,7 @@ import { useToast } from './toast.context';
 import { SocketMessage } from '../interfaces/socket-message';
 import { SocketMessageType } from '../enums/socket-message-type';
 import { StartStreamMessage } from '../interfaces/start-stream-message';
+import { useAuth } from "./auth.context";
 
 type SocketContextType = {
   socket: WebSocket | null;
@@ -13,20 +14,22 @@ const SocketContext = createContext<SocketContextType>({ socket: null });
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { principal } = useAuth();
   const socketRef = useRef<WebSocket | null>(null);
   const { showToast } = useToast();
 
   const handleShowStreamToast = (message: StartStreamMessage) => {
+    console.log('stream started');
     showToast(<p>{message.streamerId} went live</p>);
   };
   useEffect(() => {
-    if (!socketRef.current) {
+    if (!socketRef.current && principal) {
       socketRef.current = new WebSocket(
-        `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/global-sockets/ws/testID`,
+        `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/global-sockets/ws/${principal}`,
       );
       socketRef.current?.addEventListener('message', (e) => {
-        const message: SocketMessage<any> = e.data;
-
+        const message: SocketMessage<any> = JSON.parse(e.data);
+        console.log('message type ', message.type, message.type === SocketMessageType.StartStream)
         switch (message.type) {
           case SocketMessageType.StartStream:
             handleShowStreamToast(message.data);
@@ -39,7 +42,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       socketRef.current?.close();
       socketRef.current = null;
     };
-  }, []);
+  }, [principal]);
 
   return (
     <SocketContext.Provider value={{ socket: socketRef.current }}>

@@ -89,7 +89,6 @@ export function useUserProfile(targetPrincipal?: string) {
       | MotokoResult<boolean, string>
       | null
       | undefined;
-    console.log(result);
     if (!isOkResult(result)) return false;
     return result.ok;
   };

@@ -15,7 +15,6 @@ import {
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuth } from '../contexts/auth.context';
 import { StreamHistory } from '../interfaces/stream-history';
 import { getAllStreamHistory } from '../services/stream-history.service';
 import Loading from './Loading';
@@ -41,13 +40,17 @@ export default function Profile() {
   >('videos');
 
   useEffect(() => {
+    console.log(isFollowing, 'fdfd');
+  }, [isFollowing])
+
+  useEffect(() => {
     if (user) {
       getAllStreamHistory(user.principal_id).then((history) => {
         if (history) {
           setStreamHistory(history);
         }
       });
-      checkFollowingStatus(user.principal_id);
+      checkFollowingStatus(user.principal_id).then(s => console.log('dfdf', s));
     }
   }, [user]);
 
@@ -141,10 +144,10 @@ export default function Profile() {
                     <p className="mt-1 text-sm text-white/70">{bio}</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2 sm:mt-0">
-                    <button className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold">
+                    <a className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold" href={`/stream/${user?.principal_id}`}>
                       <PlayCircle className="h-4 w-4" />
                       Watch Live
-                    </button>
+                    </a>
                     {!isOwnProfile &&
                       (isFollowing ? (
                         <button

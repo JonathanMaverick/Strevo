@@ -203,9 +203,7 @@ export function useFollowing() {
   };
 
   const checkFollowingStatus = async (targetPrincipal: string) => {
-    console.log(principal);
     if (!principal) return false;
-    console.log(principal, targetPrincipal);
     setSelectedUser(targetPrincipal);
     await checkIsFollowing([principal, targetPrincipal]);
     return getIsFollowing();
