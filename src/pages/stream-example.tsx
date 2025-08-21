@@ -1,13 +1,15 @@
 import { useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { Loader2, Send } from 'lucide-react';
+import { Heart, Loader2, Send } from 'lucide-react';
 import { useUserProfile } from '../services/user-profile.service';
 import { useTransfer } from '@connect2ic/react';
+import DonationModal from '../components/DonationModal';
 
 export default function StreamExample() {
   const { streamerId } = useParams();
   const [transferAmount, setTransferAmount] = useState<number>(0);
   const [transferStatus, setTransferStatus] = useState<string>('');
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   const {
     user,
@@ -51,7 +53,7 @@ export default function StreamExample() {
     try {
       setTransferStatus('Processing transfer...');
       const result = await transfer();
-      console.log(result)
+      console.log(result);
       if (result.isOk()) {
         setTransferStatus(
           `Transfer successful! Transaction: ${result.value.transactionId}`,
@@ -118,7 +120,7 @@ export default function StreamExample() {
               disabled={transferLoading}
             />
             <button
-              onClick={handleTransfer}
+              onClick={() => setIsDonationModalOpen(true)}
               disabled={
                 transferLoading || !transferAmount || transferAmount <= 0
               }
@@ -201,6 +203,21 @@ export default function StreamExample() {
       >
         Refresh Profile
       </button>
+
+      <button
+        onClick={() => setIsDonationModalOpen(true)}
+        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center gap-2"
+      >
+        <Heart className="h-4 w-4" />
+        Donate
+      </button>
+
+      <DonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        recipientPrincipalId={user?.principal_id || ''}
+        recipientUsername={user?.username}
+      />
     </div>
   );
 }
