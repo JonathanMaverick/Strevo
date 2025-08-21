@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   PlayCircle,
@@ -41,17 +41,30 @@ export default function Profile() {
   const [stream, setStream] = useState<Stream | undefined>();
   const [isLive, setIsLive] = useState(false);
 
+  const fetchedForId = useRef<string | null>(null);
+
   useEffect(() => {
-    if (user) {
-      getAllStreamHistory(user.principal_id).then((history) => {
-        if (history) setStreamHistory(history);
-      });
-      checkFollowingStatus(user.principal_id);
-      getStreamByStreamerID(user.principal_id).then((s) => {
-        if (s) setStream(s);
-      });
-    }
-  }, [user, checkFollowingStatus]);
+    if (!principalId) return;
+    if (fetchedForId.current === principalId) return;
+    fetchedForId.current = principalId;
+
+    let cancelled = false;
+
+    Promise.all([
+      getAllStreamHistory(principalId),
+      getStreamByStreamerID(principalId),
+    ]).then(([history, s]) => {
+      if (cancelled) return;
+      if (history) setStreamHistory(history);
+      if (s) setStream(s);
+    });
+
+    checkFollowingStatus(principalId);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [principalId]);
 
   if (isLoading || !isProfileLoaded) return <Loading />;
 
