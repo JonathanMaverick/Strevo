@@ -163,7 +163,10 @@ export default function StreamPage() {
           <div className="flex items-center gap-3">
             <img
               alt="avatar"
-              src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
+              src={
+                user?.profile_picture ||
+                `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(user?.username || 'N'))}`
+              }
               className="h-12 w-12 rounded-xl ring-2 ring-white/10"
             />
             <div>
@@ -309,11 +312,6 @@ export default function StreamPage() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <img
-                    alt="avatar"
-                    src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
-                    className="h-6 w-6 rounded-md ring-2 ring-white/10"
-                  />
                   <div className="text-sm font-semibold">Chat</div>
                 </div>
               </div>
