@@ -169,7 +169,7 @@ export default function Profile() {
                       <Crown className="h-4 w-4" />
                       Subscribe
                     </button>
-                    <button
+                    {/* <button
                       className="rounded-xl border border-white/10 p-2 hover:border-white/20"
                       aria-label="Notifications"
                     >
@@ -180,14 +180,16 @@ export default function Profile() {
                       aria-label="Share"
                     >
                       <Share2 className="h-4 w-4" />
-                    </button>
-                    <Link
-                      to="/settings"
-                      className="rounded-xl border border-white/10 p-2 hover:border-white/20"
-                      aria-label="Settings"
-                    >
-                      <SettingsIcon className="h-4 w-4" />
-                    </Link>
+                    </button> */}
+                    {isOwnProfile && (
+                      <Link
+                        to="/settings"
+                        className="rounded-xl border border-white/10 p-2 hover:border-white/20"
+                        aria-label="Settings"
+                      >
+                        <SettingsIcon className="h-4 w-4" />
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>
@@ -246,14 +248,14 @@ export default function Profile() {
                   <p className="text-sm font-semibold">—</p>
                   <p className="text-xs text-white/60">—</p>
                 </div>
-                <div className="flex items-center gap-2">
+                {/* <div className="flex items-center gap-2">
                   <button className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
                     Follow
                   </button>
                   <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
                     <Heart className="h-4 w-4" />
                   </button>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -409,7 +411,7 @@ export default function Profile() {
             transition={{ duration: 0.4, delay: 0.05 }}
             className="hidden lg:block"
           >
-            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+            {/* <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
                 Channel Perks
               </div>
@@ -445,9 +447,9 @@ export default function Profile() {
                   Subscribe
                 </button>
               </div>
-            </div>
+            </div> */}
 
-            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
                 Recent Subscribers
               </div>

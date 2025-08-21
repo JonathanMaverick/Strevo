@@ -159,7 +159,7 @@ export default function ProfileFollowing() {
               items.map((u: any, idx: number) => {
                 const p = getPrincipal(u);
                 const name = getName(u);
-                const href = p ? `/profile/${p}` : '#';
+                const href = p ? `/profiles/${p}` : '#';
                 return (
                   <div
                     key={idx}
