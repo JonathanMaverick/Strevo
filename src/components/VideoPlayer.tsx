@@ -74,7 +74,7 @@ export function VideoPlayer({ url }: { url: string }) {
     video.muted = newVolume === 0;
     setVolume(newVolume);
     setMuted(newVolume === 0);
-    
+
     if (newVolume > 0) {
       setPreviousVolume(newVolume);
     }
@@ -150,26 +150,26 @@ export function VideoPlayer({ url }: { url: string }) {
       setIsLoading(true);
       setVideoError(null);
     };
-    
+
     const handleLoadedData = () => {
       setIsLoading(false);
       setVideoError(null);
     };
-    
+
     const handleError = () => {
       setIsLoading(false);
       setVideoError('Failed to load video. Please try again.');
     };
-    
+
     const handlePlaying = () => {
       setIsLoading(false);
       setPlaying(true);
     };
-    
+
     const handlePause = () => setPlaying(false);
-    
+
     const handleWaiting = () => setIsLoading(true);
-    
+
     // Fixed volume change event handler
     const handleVolumeChangeEvent = () => {
       setVolume(video.volume);

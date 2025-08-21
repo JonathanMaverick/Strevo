@@ -179,7 +179,7 @@ export default function StreamPage() {
                 user?.profile_picture ||
                 `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(user?.username || 'N'))}`
               }
-              className="h-12 w-12 rounded-xl ring-2 ring-white/10"
+              className="h-12 w-12 rounded-xl ring-2 ring-white/10 object-cover"
             />
             <div>
               <Link
@@ -305,10 +305,6 @@ export default function StreamPage() {
                     <span className="text-white/90 font-medium">
                       {followersVal}
                     </span>
-                  </span>
-                  <span>
-                    Subscribers:{' '}
-                    <span className="text-white/90 font-medium">12.8K</span>
                   </span>
                 </div>
               </div>

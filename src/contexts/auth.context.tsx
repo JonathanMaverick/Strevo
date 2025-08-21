@@ -87,7 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-
     if (!isInitializing && !isInitialized) {
       setIsInitialized(true);
     }

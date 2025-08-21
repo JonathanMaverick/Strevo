@@ -204,13 +204,11 @@ export default function Navbar() {
   return (
     <>
       <header className="relative z-50 border-b border-white/5">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
-    <Link to="/" className="flex items-center gap-3">
-      <img src={Logo} alt="Strevo Logo" className="h-10 w-auto" /> 
-      <span className="text-xl font-semibold tracking-tight"> 
-        Strevo
-      </span>
-    </Link>
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+          <Link to="/" className="flex items-center gap-3">
+            <img src={Logo} alt="Strevo Logo" className="h-10 w-auto" />
+            <span className="text-xl font-semibold tracking-tight">Strevo</span>
+          </Link>
 
           <div className="hidden items-center gap-8 md:flex">
             <Link to="/" className="text-sm text-white/80 hover:text-white">

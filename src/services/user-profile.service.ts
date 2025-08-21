@@ -22,7 +22,11 @@ export function useUserProfile(targetPrincipal?: string) {
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: userData, call: fetchUser, loading: userLoading } = useQueryCall({
+  const {
+    data: userData,
+    call: fetchUser,
+    loading: userLoading,
+  } = useQueryCall({
     functionName: 'getUser',
     args: [profilePrincipal || ''],
     refetchOnMount: false,

@@ -101,7 +101,7 @@ export function HLSVideoPlayer({
       setPlaying(true);
     };
     const handlePause = () => setPlaying(false);
-    
+
     // Fixed volume change handler
     const handleVolumeChange = () => {
       setVolume(video.volume);
@@ -216,7 +216,7 @@ export function HLSVideoPlayer({
     video.muted = newVolume === 0;
     setVolume(newVolume);
     setMuted(newVolume === 0);
-    
+
     if (newVolume > 0) {
       setPreviousVolume(newVolume);
     }
@@ -246,7 +246,7 @@ export function HLSVideoPlayer({
   useEffect(() => {
     setupHLS();
     const cleanup = handleVideoEvents();
-    
+
     return () => {
       if (hlsRef.current) {
         hlsRef.current.destroy();
@@ -360,7 +360,9 @@ export function HLSVideoPlayer({
                     max="1"
                     step="0.05"
                     value={muted ? 0 : volume}
-                    onChange={(e) => handleVolumeSliderChange(parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      handleVolumeSliderChange(parseFloat(e.target.value))
+                    }
                     className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
                     style={{
                       background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${(muted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) ${(muted ? 0 : volume) * 100}%, rgba(255,255,255,0.2) 100%)`,
@@ -388,8 +390,9 @@ export function HLSVideoPlayer({
                     <button
                       key={option.value}
                       onClick={() => handleQualityChange(option.value)}
-                      className={`block w-full px-3 py-2 text-[10px] text-left hover:bg-white/10 transition-colors ${currentQuality === option.value ? 'bg-blue-500/20' : ''
-                        }`}
+                      className={`block w-full px-3 py-2 text-[10px] text-left hover:bg-white/10 transition-colors ${
+                        currentQuality === option.value ? 'bg-blue-500/20' : ''
+                      }`}
                     >
                       {option.label}
                     </button>

@@ -10,7 +10,6 @@ import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { TopChannels } from '../components/home/TopChannel';
 
-
 export default function Home() {
   const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
 

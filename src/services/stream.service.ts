@@ -18,7 +18,9 @@ export async function getAllActiveStream(): Promise<Stream[] | undefined> {
 
 export async function getStreamByStreamerID(hostPrincipalId: string) {
   try {
-    const response = await axios.get(`${ENDPOINT}/by-streamer-id?streamerID=${hostPrincipalId}`);
+    const response = await axios.get(
+      `${ENDPOINT}/by-streamer-id?streamerID=${hostPrincipalId}`,
+    );
     if (response.status !== HttpStatusCode.Ok) {
       return undefined;
     }
@@ -27,7 +29,6 @@ export async function getStreamByStreamerID(hostPrincipalId: string) {
   } catch (error) {
     return undefined;
   }
-
 }
 
 export async function createStream(payload: StreamFormData) {

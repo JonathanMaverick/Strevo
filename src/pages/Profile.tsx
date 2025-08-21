@@ -1,8 +1,7 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   PlayCircle,
-  Crown,
   Users,
   Settings as SettingsIcon,
   Heart,
@@ -164,31 +163,36 @@ export default function Profile() {
                       </Link>
                     )}
 
-                    {!isOwnProfile &&
-                      (isFollowing ? (
+                    {!isOwnProfile && (
+                      <div className="flex items-center gap-2">
                         <button
-                          className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
-                          onClick={() => handleUnfollow(principalId!)}
-                          disabled={unfollowLoading}
+                          onClick={() => setIsDonationModalOpen(true)}
+                          className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
                         >
-                          Unfollow
+                          <Heart className="h-4 w-4" />
+                          Donate
                         </button>
-                      ) : (
-                        <button
-                          className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
-                          onClick={() => handleFollow(principalId!)}
-                          disabled={followLoading}
-                        >
-                          Follow
-                        </button>
-                      ))}
-                    <button
-                      onClick={() => setIsDonationModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
-                    >
-                      <Heart className="h-4 w-4" />
-                      Donate
-                    </button>
+
+                        {isFollowing ? (
+                          <button
+                            className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
+                            onClick={() => handleUnfollow(principalId!)}
+                            disabled={unfollowLoading}
+                          >
+                            Unfollow
+                          </button>
+                        ) : (
+                          <button
+                            className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
+                            onClick={() => handleFollow(principalId!)}
+                            disabled={followLoading}
+                          >
+                            Follow
+                          </button>
+                        )}
+                      </div>
+                    )}
+
                     {isOwnProfile && (
                       <Link
                         to="/settings"

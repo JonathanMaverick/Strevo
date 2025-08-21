@@ -9,8 +9,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { getAllCategory, Category } from '../services/category.service';
 import { createStream } from '../services/stream.service';
 import type { StreamFormData } from '../interfaces/stream';
-import { getStreamInfo, saveStreamInfo } from "../services/stream-info.service";
-import { StreamInfo } from "../interfaces/stream-info";
+import { getStreamInfo, saveStreamInfo } from '../services/stream-info.service';
+import { StreamInfo } from '../interfaces/stream-info';
 
 export default function EditStreamInfoForm({
   principalId,
@@ -26,13 +26,16 @@ export default function EditStreamInfoForm({
   const [categories, setCategories] = useState<Category[]>([]);
 
   const triggerRef = useRef<HTMLDivElement>(null);
-  const [streamInfo, setStreamInfo] = useState<StreamInfo>({hostPrincipalId: principalId, title: ""} as StreamInfo);
+  const [streamInfo, setStreamInfo] = useState<StreamInfo>({
+    hostPrincipalId: principalId,
+    title: '',
+  } as StreamInfo);
 
   useEffect(() => {
-    getStreamInfo(principalId).then(streamInfo => {
+    getStreamInfo(principalId).then((streamInfo) => {
       if (streamInfo) setStreamInfo(streamInfo);
-    })
-  }, [])
+    });
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -83,7 +86,9 @@ export default function EditStreamInfoForm({
     [streamInfo],
   );
   const selected = categories.find(
-    (c: any) => c.categoryID === streamInfo.categoryId || c.CategoryID === streamInfo.categoryId,
+    (c: any) =>
+      c.categoryID === streamInfo.categoryId ||
+      c.CategoryID === streamInfo.categoryId,
   );
 
   const handleSubmit = async () => {
@@ -134,7 +139,9 @@ export default function EditStreamInfoForm({
             <label className="text-xs font-medium text-white/80">Title</label>
             <input
               value={streamInfo.title}
-              onChange={(e) => setStreamInfo(prev => ({...prev, title: e.target.value}))}
+              onChange={(e) =>
+                setStreamInfo((prev) => ({ ...prev, title: e.target.value }))
+              }
               placeholder="Stream Title"
               className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-3 py-2.5 text-sm outline-none placeholder:text-white/40 focus:border-white/20"
               required
@@ -183,7 +190,10 @@ export default function EditStreamInfoForm({
                             key={id}
                             type="button"
                             onClick={() => {
-                              setStreamInfo(prev => ({...prev, categoryId: id}));
+                              setStreamInfo((prev) => ({
+                                ...prev,
+                                categoryId: id,
+                              }));
                               setIsDropdownOpen(false);
                             }}
                             className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-white/10 ${streamInfo.categoryId === id ? 'bg-sky-600/20 text-sky-300' : 'text-white/80'}`}

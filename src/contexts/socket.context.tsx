@@ -3,7 +3,7 @@ import { useToast } from './toast.context';
 import { SocketMessage } from '../interfaces/socket-message';
 import { SocketMessageType } from '../enums/socket-message-type';
 import { StartStreamMessage } from '../interfaces/start-stream-message';
-import { useAuth } from "./auth.context";
+import { useAuth } from './auth.context';
 
 type SocketContextType = {
   socket: WebSocket | null;

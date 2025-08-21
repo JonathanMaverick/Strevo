@@ -62,21 +62,6 @@ export default function ProfileFollowing() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          {/* {principalId ? (
-            <Link
-              to={`/profiles/${principalId}`}
-              className="text-xs text-sky-400 hover:text-sky-300"
-            >
-              View Profile
-            </Link>
-          ) : (
-            <Link
-              to="/profiles"
-              className="text-xs text-sky-400 hover:text-sky-300"
-            >
-              View Profile
-            </Link>
-          )} */}
         </div>
 
         <motion.section

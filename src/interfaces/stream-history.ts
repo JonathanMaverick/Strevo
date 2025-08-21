@@ -11,5 +11,5 @@ export interface StreamHistory {
   categoryName: string;
   messages: StreamMessage[];
   totalView: number;
-  createdAt: string
+  createdAt: string;
 }

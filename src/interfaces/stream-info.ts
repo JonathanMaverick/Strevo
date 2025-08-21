@@ -1,6 +1,5 @@
-
 export interface StreamInfo {
-    hostPrincipalId: string;
-    title: string;
-    categoryId: string;
+  hostPrincipalId: string;
+  title: string;
+  categoryId: string;
 }

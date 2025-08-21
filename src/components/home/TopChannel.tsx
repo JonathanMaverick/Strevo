@@ -24,9 +24,12 @@ function TopChannelItem({ stream }: { stream: Stream }) {
         ) : (
           <img
             alt="avatar"
-            src={user?.profile_picture || `data:image/svg+xml;utf8,${encodeURIComponent(
-              avatarSvg(stream.hostPrincipalID[0]?.toUpperCase() || 'U')
-            )}`}
+            src={
+              user?.profile_picture ||
+              `data:image/svg+xml;utf8,${encodeURIComponent(
+                avatarSvg(stream.hostPrincipalID[0]?.toUpperCase() || 'U'),
+              )}`
+            }
             className="h-7 w-7 rounded-full ring-2 ring-white/10 object-cover"
           />
         )}

@@ -1,8 +1,10 @@
-import axios, { HttpStatusCode } from "axios";
-import { StreamInfo } from "../interfaces/stream-info";
+import axios, { HttpStatusCode } from 'axios';
+import { StreamInfo } from '../interfaces/stream-info';
 
-const ENDPOINT = `http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/stream-info`
-export async function getStreamInfo(hostPrincipalID: string): Promise<StreamInfo | undefined> {
+const ENDPOINT = `http://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/stream-info`;
+export async function getStreamInfo(
+  hostPrincipalID: string,
+): Promise<StreamInfo | undefined> {
   try {
     const response = await axios.get(`${ENDPOINT}/${hostPrincipalID}`);
     if (response.status !== HttpStatusCode.Ok) {
@@ -13,10 +15,11 @@ export async function getStreamInfo(hostPrincipalID: string): Promise<StreamInfo
   } catch (error) {
     return undefined;
   }
-
 }
 
-export async function saveStreamInfo(streamInfo: StreamInfo): Promise<boolean | undefined> {
+export async function saveStreamInfo(
+  streamInfo: StreamInfo,
+): Promise<boolean | undefined> {
   try {
     const response = await axios.put(`${ENDPOINT}`, streamInfo);
     if (response.status !== HttpStatusCode.NoContent) {
@@ -27,5 +30,4 @@ export async function saveStreamInfo(streamInfo: StreamInfo): Promise<boolean | 
   } catch (error) {
     return undefined;
   }
-
 }
