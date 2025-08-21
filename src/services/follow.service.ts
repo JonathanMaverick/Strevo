@@ -79,13 +79,11 @@ export function useFollowing() {
   } = useUpdateCall({
     functionName: 'follow',
     onSuccess: (result) => {
-      console.log('Follow result:', result);
       const typedResult = result as MotokoResult<string, string>;
       if (isErrResult(typedResult)) {
         console.error('Follow failed:', typedResult.err);
         return;
       }
-      console.log('Successfully followed user:', typedResult.ok);
       refetchFollowingData();
     },
     onError: (error) => {
@@ -101,7 +99,6 @@ export function useFollowing() {
   } = useUpdateCall({
     functionName: 'unfollow',
     onSuccess: (result) => {
-      console.log('Unfollow result:', result);
       const typedResult = result as MotokoResult<string, string>;
       if (isErrResult(typedResult)) {
         console.error('Unfollow failed:', typedResult.err);

@@ -85,7 +85,6 @@ export function HLSVideoPlayer({
           setIsLive(true);
         })
         .catch((error) => {
-          console.log('Autoplay prevented:', error);
           setPlaying(false);
         });
     };
@@ -152,7 +151,6 @@ export function HLSVideoPlayer({
       hls.attachMedia(video);
 
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        console.log('HLS manifest parsed');
         setVideoError(null);
       });
 
@@ -243,7 +241,6 @@ export function HLSVideoPlayer({
   const handleQualityChange = (quality: string) => {
     setCurrentQuality(quality);
     setShowQualityMenu(false);
-    console.log(`Switching to ${quality} quality`);
   };
 
   useEffect(() => {

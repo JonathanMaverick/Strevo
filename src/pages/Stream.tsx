@@ -119,7 +119,6 @@ export default function StreamPage() {
     loadProfile(principalId);
     getStreamByStreamerID(principalId).then((s) => {
       if (s) setStream(s);
-      console.log('Stream data:', s);
     });
 
     return () => {

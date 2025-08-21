@@ -1,6 +1,6 @@
 OS := $(shell uname 2>/dev/null || echo Windows)
 
-.PHONY: backend frontend nodejs ai run-all
+.PHONY: backend frontend nodejs ai run-all run
 
 backend:
 	@echo "Starting backend"
@@ -18,9 +18,7 @@ frontend:
 	@echo "Starting frontend"
 
 ifeq ($(OS),Linux)
-	gnome-terminal -- bash -c "cd $(PWD) && dfx start; exec bash"
-	sleep 5
-	gnome-terminal -- bash -c "cd $(PWD) && npm run setup && npm run start; exec bash"
+	gnome-terminal -- bash -c "cd $(PWD)npm run start; exec bash"
 endif
 
 ifeq ($(OS),Darwin)
@@ -50,10 +48,12 @@ endif
 ai:
 	@echo "Starting AI services"
 
-# untuk yang linux atau MACos pip dan python version disesuaikan (minimal version > 3.10 keatas), jadi kalau misalnya versionya 3.11 berarti pip3.11 dan python3.11
 ifeq ($(OS),Linux)
-	gnome-terminal -- bash -c "cd $(PWD)/streaming-ai && pip3.11 install -r requirements.txt && python3.11 highlight/highlight_agent.py; exec bash"
-	gnome-terminal -- bash -c "cd $(PWD)/streaming-ai && pip install -r requirements.txt && python3.11 moderator/moderator_agent.py; exec bash"
+	[ -d "$(PWD)/streaming-ai/.venv" ] || python3 -m venv $(PWD)/streaming-ai/.venv
+
+	gnome-terminal -- bash -c "source $(PWD)/streaming-ai/.venv/bin/activate && pip install -r $(PWD)/streaming-ai/requirements.txt && python3 $(PWD)/streaming-ai/highlight/highlight_agent.py; exec bash"
+
+	gnome-terminal -- bash -c "source $(PWD)/streaming-ai/.venv/bin/activate && pip install -r $(PWD)/streaming-ai/requirements.txt && python3 $(PWD)/streaming-ai/moderator/moderator_agent.py; exec bash"
 endif
 
 ifeq ($(OS),Darwin)
@@ -67,6 +67,8 @@ ifeq ($(OS),Windows)
 endif
 
 
-
 run-all: backend frontend nodejs ai
 	@echo "All projects started."
+
+run: backend frontend nodejs
+	@echo "Project started."

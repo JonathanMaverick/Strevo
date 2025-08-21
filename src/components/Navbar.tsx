@@ -15,6 +15,7 @@ import { Link } from 'react-router-dom';
 import { ConnectButton, ConnectDialog } from '@connect2ic/react';
 import RegisterModal from '../components/RegisterModal';
 import { useAuth } from '../contexts/auth.context';
+import Logo from '../assets/logo.png';
 
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -203,15 +204,13 @@ export default function Navbar() {
   return (
     <>
       <header className="relative z-50 border-b border-white/5">
-        <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 shadow-lg shadow-sky-500/25">
-              <PlayCircle className="h-5 w-5" />
-            </div>
-            <span className="text-lg font-semibold tracking-tight">
-              ICP Stream
-            </span>
-          </Link>
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
+    <Link to="/" className="flex items-center gap-3">
+      <img src={Logo} alt="Strevo Logo" className="h-10 w-auto" /> 
+      <span className="text-xl font-semibold tracking-tight"> 
+        Strevo
+      </span>
+    </Link>
 
           <div className="hidden items-center gap-8 md:flex">
             <Link to="/" className="text-sm text-white/80 hover:text-white">
@@ -249,7 +248,7 @@ export default function Navbar() {
                   <div className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-sky-500 to-blue-600">
                     <PlayCircle className="h-4 w-4" />
                   </div>
-                  <span className="text-sm font-semibold">ICP Stream</span>
+                  <span className="text-sm font-semibold">Strevo</span>
                 </div>
                 <button
                   className="rounded-lg border border-white/10 p-2"

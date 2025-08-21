@@ -8,12 +8,8 @@ import { StreamVideoCard } from '../components/StreamVideoCard';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { TopChannels } from '../components/home/TopChannel';
 
-function formatViewerCount(count: number) {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
-  return `${count}`;
-}
 
 export default function Home() {
   const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
@@ -23,6 +19,12 @@ export default function Home() {
       if (streams) setActiveStreams(streams);
     });
   }, []);
+
+  function formatViewerCount(count: number) {
+    if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
+    if (count >= 1_000) return `${(count / 1_000).toFixed(1)}K`;
+    return `${count}`;
+  }
 
   const sortedStreams = [...activeStreams].sort(
     (a, b) => b.viewerCount - a.viewerCount,
@@ -111,43 +113,7 @@ export default function Home() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.35, delay: 0.05 }}
             >
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
-                <div className="px-4 py-3 text-sm font-semibold">
-                  Top channels
-                </div>
-                <div className="divide-y divide-white/5">
-                  {sortedStreams.slice(0, 6).map((stream) => (
-                    <a
-                      key={stream.streamId}
-                      href="#"
-                      className="flex items-center justify-between px-4 py-3 hover:bg-white/[0.04]"
-                    >
-                      <div className="flex items-center gap-3">
-                        <img
-                          alt="avatar"
-                          src={`data:image/svg+xml;utf8,${encodeURIComponent(
-                            avatarSvg(
-                              stream.hostPrincipalID[0]?.toUpperCase() || 'U',
-                            ),
-                          )}`}
-                          className="h-7 w-7 rounded-full ring-2 ring-white/10"
-                        />
-                        <div>
-                          <div className="text-sm">
-                            {stream.hostPrincipalID}
-                          </div>
-                          <div className="text-[10px] text-white/60">
-                            Live now • {formatViewerCount(stream.viewerCount)}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="text-[10px] text-white/60">
-                        {stream.categoryName}
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
+              <TopChannels streams={activeStreams} />
             </motion.aside>
           </div>
         )}

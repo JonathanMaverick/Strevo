@@ -89,7 +89,6 @@ export default function EditStreamInfoForm({
   const handleSubmit = async () => {
     setError(null);
     setSuccess(null);
-    console.log('submitting', streamInfo)
     if (!streamInfo.title.trim()) return setError('Title is required.');
     if (!streamInfo.categoryId) return setError('Please select a category.');
     const payload: StreamInfo = {

@@ -59,7 +59,6 @@ export default function SettingsForm({ user }: { user: User }) {
         });
       }
 
-      console.log(finalAvatarUrl);
       const payload = {
         username: displayName.trim(),
         bio: bio && bio !== '' ? [bio.trim()] : [],
@@ -68,7 +67,6 @@ export default function SettingsForm({ user }: { user: User }) {
         streaming_key: user.streaming_key,
         created_at: user.created_at,
       };
-      console.log(payload)
       await updateUserCall([payload.principal_id, payload]);
       setPreviewUrl(null);
       setSelectedFile(null);

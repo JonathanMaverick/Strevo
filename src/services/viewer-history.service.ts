@@ -10,7 +10,6 @@ export async function createViewerHistory(
       viewerHistoryPrincipalID: principalId,
       viewerHistoryStreamID: streamId,
     });
-    console.log('response is ', response.status);
     if (response.status !== HttpStatusCode.Ok) {
       return undefined;
     }

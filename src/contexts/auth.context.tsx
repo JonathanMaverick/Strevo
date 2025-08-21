@@ -36,7 +36,6 @@ const PRINCIPAL_STORAGE_KEY = 'user_principal_id';
 const savePrincipalToStorage = (principal: string) => {
   try {
     localStorage.setItem(PRINCIPAL_STORAGE_KEY, principal);
-    console.log('Principal saved to localStorage:', principal);
   } catch (error) {
     console.error('Failed to save principal to localStorage:', error);
   }
@@ -54,7 +53,6 @@ const getPrincipalFromStorage = (): string | null => {
 const removePrincipalFromStorage = () => {
   try {
     localStorage.removeItem(PRINCIPAL_STORAGE_KEY);
-    console.log('Principal removed from localStorage');
   } catch (error) {
     console.error('Failed to remove principal from localStorage:', error);
   }
@@ -84,19 +82,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const savedPrincipal = getPrincipalFromStorage();
     if (savedPrincipal && !effectivePrincipal) {
-      console.log('Loaded principal from localStorage:', savedPrincipal);
       setEffectivePrincipal(savedPrincipal);
     }
   }, []);
 
   useEffect(() => {
-    console.log('Connection state:', {
-      isConnected,
-      principal,
-      isInitializing,
-      isConnecting,
-      activeProvider: activeProvider?.meta?.name,
-    });
 
     if (!isInitializing && !isInitialized) {
       setIsInitialized(true);
@@ -104,12 +94,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     if (!isInitializing) {
       if (isConnected && principal) {
-        console.log('Setting effective principal:', principal);
         setEffectivePrincipal(principal);
         savePrincipalToStorage(principal);
         setConnectionError(null);
       } else if (!isConnecting) {
-        console.log('Clearing effective principal');
         if (getPrincipalFromStorage()) {
           setEffectivePrincipal(getPrincipalFromStorage);
           return;
@@ -217,12 +205,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const handleDisconnect = async () => {
     try {
-      console.log('Disconnecting wallet and clearing user data...');
       setEffectivePrincipal(null);
       setConnectionError(null);
       removePrincipalFromStorage();
       await disconnect();
-      console.log('Wallet disconnected successfully');
     } catch (error) {
       console.error('Error during disconnect:', error);
       setEffectivePrincipal(null);

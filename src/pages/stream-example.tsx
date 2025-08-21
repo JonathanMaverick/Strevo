@@ -53,7 +53,6 @@ export default function StreamExample() {
     try {
       setTransferStatus('Processing transfer...');
       const result = await transfer();
-      console.log(result);
       if (result.isOk()) {
         setTransferStatus(
           `Transfer successful! Transaction: ${result.value.transactionId}`,

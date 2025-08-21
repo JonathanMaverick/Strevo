@@ -76,7 +76,7 @@ export default function StartStream() {
                 </h1>
                 <p className="mt-1 text-white/70 text-sm">
                   Configure OBS once. When you click Start Streaming in OBS,
-                  your broadcast will automatically go live on ICP Stream.
+                  your broadcast will automatically go live on Strevo.
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
@@ -250,13 +250,13 @@ export default function StartStream() {
                 <ul className="list-disc list-inside space-y-1">
                   <li>Click Start Streaming in OBS.</li>
                   <li>
-                    Your stream will automatically start on ICP Stream using the
+                    Your stream will automatically start on Strevo using the
                     configured RTMP server and your stream key.
                   </li>
                   <li>Click Stop Streaming in OBS to end the broadcast.</li>
                 </ul>
                 <div className="rounded-xl border border-sky-500/40 bg-sky-500/10 p-4 text-sm text-sky-300">
-                  Once you start streaming in OBS, ICP Stream will detect your
+                  Once you start streaming in OBS, Strevo will detect your
                   session and go live automatically.
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function StartStream() {
                       a: 'Ensure your RTMP server is running and not blocked by a firewall. Verify the Server value is rtmp://localhost:1935/live and that no other app uses port 1935.',
                     },
                     {
-                      q: 'The stream stays offline on ICP Stream',
+                      q: 'The stream stays offline on Strevo',
                       a: 'Confirm you clicked Start Streaming in OBS with the correct stream key. If the key changed, update OBS. Allow a few seconds after starting.',
                     },
                     {

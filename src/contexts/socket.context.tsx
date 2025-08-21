@@ -19,7 +19,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const { showToast } = useToast();
 
   const handleShowStreamToast = (message: StartStreamMessage) => {
-    console.log('stream started');
     showToast(<p>{message.streamerId} went live</p>);
   };
   useEffect(() => {
@@ -29,7 +28,6 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       socketRef.current?.addEventListener('message', (e) => {
         const message: SocketMessage<any> = JSON.parse(e.data);
-        console.log('message type ', message.type, message.type === SocketMessageType.StartStream)
         switch (message.type) {
           case SocketMessageType.StartStream:
             handleShowStreamToast(message.data);
