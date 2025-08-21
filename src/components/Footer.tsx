@@ -11,7 +11,7 @@ export default function Footer() {
           <span className="font-semibold text-white/90">ICP Stream</span>
         </div>
         <div className="flex flex-wrap items-center gap-4">
-          <a href="#" className="hover:text-white">
+          {/* <a href="#" className="hover:text-white">
             Terms
           </a>
           <a href="#" className="hover:text-white">
@@ -19,7 +19,7 @@ export default function Footer() {
           </a>
           <a href="#" className="hover:text-white">
             Status
-          </a>
+          </a> */}
           <a href="#" className="hover:text-white">
             @ICPStream
           </a>

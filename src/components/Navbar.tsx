@@ -10,9 +10,9 @@ import {
   Loader2,
   SquarePen,
 } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { ConnectButton, ConnectDialog, useConnect } from '@connect2ic/react';
+import { ConnectButton, ConnectDialog } from '@connect2ic/react';
 import RegisterModal from '../components/RegisterModal';
 import { useAuth } from '../contexts/auth.context';
 
@@ -44,7 +44,6 @@ export default function Navbar() {
     };
     const onKey = (e: KeyboardEvent) =>
       e.key === 'Escape' && setMenuOpen(false);
-
     document.addEventListener('pointerdown', onPointerDown, true);
     document.addEventListener('keydown', onKey);
     return () => {
@@ -136,7 +135,6 @@ export default function Navbar() {
               <SquarePen className="h-4 w-4" />
               Edit Stream Info
             </Link>
-
             <Link
               to="/settings"
               role="menuitem"
@@ -174,7 +172,7 @@ export default function Navbar() {
     if (isConnecting)
       return (
         <>
-          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />{' '}
+          <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
           <span className="text-blue-600 font-medium">
             Connecting wallet...
           </span>
@@ -183,16 +181,13 @@ export default function Navbar() {
     if (user) return <ProfileDropdown />;
     return (
       <div className="flex items-center gap-3">
-        <span className="text-sm text-white/60">
-          Wallet: {principal?.slice(0, 8)}...{principal?.slice(-4)}
-        </span>
         <button
           type="button"
           onClick={() => setShowRegisterModal(true)}
-          className="flex items-center gap-1 text-sm text-sky-400 hover:text-sky-300"
+          className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-4 py-1.5 text-sm font-medium text-white shadow-lg shadow-sky-500/20 hover:opacity-95"
         >
           <UserPlus className="h-4 w-4" />
-          Register
+          Set up profile
         </button>
         <button
           type="button"
@@ -293,7 +288,7 @@ export default function Navbar() {
                       </div>
                       <div className="flex flex-col gap-2">
                         <Link
-                          to="/profiles"
+                          to={`/profiles/${principal}`}
                           onClick={() => setMobileOpen(false)}
                           className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/90 hover:bg-white/5"
                         >
@@ -303,7 +298,7 @@ export default function Navbar() {
                         <Link
                           to="/start-stream"
                           role="menuitem"
-                          onClick={() => setMenuOpen(false)}
+                          onClick={() => setMobileOpen(false)}
                           className="flex items-center gap-2 px-3 py-2 text-sm text-white/90 hover:bg-white/5"
                         >
                           <PlayCircle className="h-4 w-4" />
@@ -317,7 +312,6 @@ export default function Navbar() {
                           <SquarePen className="h-4 w-4" />
                           Edit Stream Info
                         </Link>
-
                         <Link
                           to="/settings"
                           onClick={() => setMobileOpen(false)}
@@ -341,10 +335,8 @@ export default function Navbar() {
                     </div>
                   ) : (
                     <div className="flex items-center justify-between gap-3">
-                      <span className="text-sm text-white/60">
-                        {principal
-                          ? `Wallet: ${principal.slice(0, 8)}...${principal.slice(-4)}`
-                          : 'Wallet connected'}
+                      <span className="text-sm text-white/70">
+                        Wallet connected
                       </span>
                       <div className="flex gap-2">
                         <button
@@ -353,10 +345,10 @@ export default function Navbar() {
                             setMobileOpen(false);
                             setShowRegisterModal(true);
                           }}
-                          className="flex items-center gap-1 rounded-lg px-3 py-2 text-sm text-sky-400 hover:text-sky-300"
+                          className="flex items-center gap-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15"
                         >
                           <UserPlus className="h-4 w-4" />
-                          Register
+                          Set up profile
                         </button>
                         <button
                           type="button"

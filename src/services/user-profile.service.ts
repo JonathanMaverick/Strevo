@@ -12,6 +12,8 @@ import {
   FollowersInterface,
   FollowingInterface,
 } from '../interfaces/following';
+import { Subscription } from '../interfaces/subscription';
+import { SubscriberSummary } from '../interfaces/subscriber-sumary';
 
 export function useUserProfile(targetPrincipal?: string) {
   const { principal } = useAuth();
@@ -59,6 +61,20 @@ export function useUserProfile(targetPrincipal?: string) {
     args: [principal || '', profilePrincipal || ''],
     refetchOnMount: false,
   });
+
+  const { data: subscribersCountData, call: fetchSubscribersCount } =
+    useQueryCall({
+      functionName: 'getSubscribersCount',
+      args: [profilePrincipal || ''],
+      refetchOnMount: false,
+    });
+
+  const { data: allSubscriptionsData, call: fetchAllSubscriptions } =
+    useQueryCall({
+      functionName: 'getAllSubscriptions',
+      args: [profilePrincipal || ''],
+      refetchOnMount: false,
+    });
 
   const getUser = (): User | null => {
     const result = userData as MotokoResult<User, string> | null | undefined;
@@ -111,9 +127,39 @@ export function useUserProfile(targetPrincipal?: string) {
     return result.ok;
   };
 
-  const getUserStats = (): UserStats => ({
+  const getSubscribersCount = (): number => {
+    const result = subscribersCountData as
+      | MotokoResult<bigint, string>
+      | null
+      | undefined;
+    if (!isOkResult(result)) return 0;
+    return Number(result.ok);
+  };
+
+  const getRecentSubscribers = (): SubscriberSummary[] => {
+    const result = allSubscriptionsData as
+      | MotokoResult<Subscription[], string>
+      | null
+      | undefined;
+    if (!isOkResult(result)) return [];
+    return result.ok
+      .map(
+        (s): SubscriberSummary => ({
+          principal_id: s.subscribing.principal_id,
+          username: s.subscribing.username,
+          avatar: s.subscribing.profile_picture || null,
+          bio: s.subscribing.bio ?? null,
+          created_at: s.subscribing.created_at ?? null,
+        }),
+      )
+      .sort((a, b) => (b.created_at ?? 0) - (a.created_at ?? 0))
+      .slice(0, 5);
+  };
+
+  const getUserStats = (): UserStats & { subscribersCount: number } => ({
     followersCount: getFollowersCount(),
     followingCount: getFollowingCount(),
+    subscribersCount: getSubscribersCount(),
   });
 
   const getUserError = (): string | null => {
@@ -131,10 +177,8 @@ export function useUserProfile(targetPrincipal?: string) {
       | MotokoResult<bigint, string>
       | null
       | undefined;
-
     if (isErrResult(followersResult)) return followersResult.err;
     if (isErrResult(followingResult)) return followingResult.err;
-
     return null;
   };
 
@@ -148,6 +192,8 @@ export function useUserProfile(targetPrincipal?: string) {
           fetchFollowingCount([userPrincipal]),
           fetchFollowingList([userPrincipal]),
           fetchFollowersList([userPrincipal]),
+          fetchSubscribersCount([userPrincipal]),
+          fetchAllSubscriptions([userPrincipal]),
         ]);
       } finally {
         setIsLoading(false);
@@ -159,6 +205,8 @@ export function useUserProfile(targetPrincipal?: string) {
       fetchFollowingCount,
       fetchFollowingList,
       fetchFollowersList,
+      fetchSubscribersCount,
+      fetchAllSubscriptions,
       principal,
     ],
   );
@@ -191,18 +239,15 @@ export function useUserProfile(targetPrincipal?: string) {
     followingList: getFollowingList(),
     followersList: getFollowersList(),
     isFollowing: getIsFollowing(),
-
     isFollowingLoading,
-
     isOwnProfile,
     isProfileLoaded,
     isLoading,
     hasError,
     error,
-
     userError: getUserError(),
     statsError: getStatsError(),
-
+    recentSubscribers: getRecentSubscribers(),
     loadProfile,
     refreshProfile,
     setProfilePrincipal,
