@@ -1,57 +1,33 @@
-import React, {
-  FormEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from 'react';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize2,
-  Settings,
-  Share2,
-  Heart,
-  Flag,
-  Send,
-  Smile,
-  MapPin,
-  Calendar,
-  Youtube,
-  Twitter,
-  Instagram,
-  Twitch,
-  Globe,
-  Mail,
-  Crown,
-  AlertCircle,
-  Loader2,
-} from 'lucide-react';
+import { Crown, Send, X, DollarSign, User as UserIcon } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChatMessage } from '../interfaces/chat-message';
-import { SocketMessage } from '../interfaces/socket-message';
-import { SocketMessageType } from '../enums/socket-message-type';
-import Hls from 'hls.js';
 import { useAuth } from '../contexts/auth.context';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
+import { useUserProfile } from '../services/user-profile.service';
+import { useFollowing } from '../services/follow.service';
+import Loading from './Loading';
 import { StreamHistory } from '../interfaces/stream-history';
-import {
-  getAllStreamHistory,
-  getStreamHistoryById,
-} from '../services/stream-history.service';
+import { getStreamHistoryById } from '../services/stream-history.service';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { createViewerHistory } from '../services/viewer-history.service';
-import { useFollowing } from '../services/follow.service';
-import { useUserProfile } from '../services/user-profile.service';
+
+const formatNumberCompact = (val: number) => {
+  if (val >= 1_000_000) return `${(val / 1_000_000).toFixed(1)}M`;
+  if (val >= 1_000) return `${(val / 1_000).toFixed(1)}K`;
+  return `${val}`;
+};
 
 export default function StreamHistoryPage() {
   const { streamHistoryId } = useParams();
+  const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const [history, setHistory] = useState<StreamHistory | undefined>();
+  const { user, stats, loadProfile, isProfileLoaded, isOwnProfile } =
+    useUserProfile(history?.hostPrincipalID);
   const {
     isFollowing,
     handleFollow,
@@ -60,56 +36,75 @@ export default function StreamHistoryPage() {
     followLoading,
     unfollowLoading,
   } = useFollowing();
-
   const [showChat, setShowChat] = useState(true);
-  const navigate = useNavigate();
-  const socketRef = useRef<WebSocket>(null!);
-  const [streamHistory, setStreamHistory] = useState<StreamHistory>();
-  const { user: authUser } = useAuth();
-  const { user, loadProfile, isProfileLoaded, isOwnProfile } = useUserProfile(
-    streamHistory?.hostPrincipalID,
-  );
+  const [donateOpen, setDonateOpen] = useState(false);
+  const [donateAmount, setDonateAmount] = useState<string>('');
+  const [donateError, setDonateError] = useState<string>('');
+  const [donating, setDonating] = useState(false);
+  const isAuthenticated = !!currentUser;
+  const messageInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     if (!streamHistoryId) {
       navigate(-1);
       return;
     }
-    checkFollowingStatus(streamHistoryId);
-    getStreamHistoryById(streamHistoryId).then((history) => {
-      setStreamHistory(history);
-      if (history) loadProfile(history.hostPrincipalID);
+    getStreamHistoryById(streamHistoryId).then((h) => {
+      setHistory(h);
+      if (h?.hostPrincipalID) loadProfile(h.hostPrincipalID);
     });
   }, []);
 
   useEffect(() => {
-    if (user) createViewerHistory(user.principal_id, streamHistoryId!);
-  }, [user]);
+    if (user) {
+      checkFollowingStatus(user.principal_id);
+      if (history?.streamHistoryID)
+        createViewerHistory(user.principal_id, history.streamHistoryID);
+    }
+  }, [user, history?.streamHistoryID]);
 
-  const tags = ['FPS', 'Ranked', 'Scrims', 'Coaching', 'Analysis'];
+  const followersVal =
+    typeof stats?.followersCount === 'number'
+      ? formatNumberCompact(stats.followersCount)
+      : '—';
 
-  const socials = [
-    { label: 'YouTube', url: '#', handle: '@NovaSpectre', icon: Youtube },
-    { label: 'X (Twitter)', url: '#', handle: '@novaspectre', icon: Twitter },
-    { label: 'Instagram', url: '#', handle: '@nova.gg', icon: Instagram },
-    { label: 'Twitch', url: '#', handle: 'novaspectre', icon: Twitch },
-    { label: 'Website', url: '#', handle: 'novaspectre.gg', icon: Globe },
-    {
-      label: 'Business',
-      url: 'mailto:contact@novaspectre.gg',
-      handle: 'contact@novaspectre.gg',
-      icon: Mail,
-    },
-  ];
+  const tags = useMemo(() => {
+    const raw = history?.categoryName?.trim() || '';
+    if (!raw) return [];
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }, [history?.categoryName]);
 
-  if (!streamHistory) {
-    return (
-      <div className="min-h-screen bg-[#0A0E17] text-white flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading video...</span>
-        </div>
-      </div>
-    );
+  const openDonate = () => {
+    setDonateAmount('');
+    setDonateError('');
+    setDonateOpen(true);
+  };
+
+  const closeDonate = () => {
+    if (donating) return;
+    setDonateOpen(false);
+  };
+
+  const submitDonate = (e: FormEvent) => {
+    e.preventDefault();
+    const amt = Number(donateAmount);
+    if (isNaN(amt) || amt <= 0) {
+      setDonateError('Please enter a valid amount greater than 0.');
+      return;
+    }
+    setDonateError('');
+    setDonating(true);
+    setTimeout(() => {
+      setDonating(false);
+      setDonateOpen(false);
+    }, 600);
+  };
+
+  if (!history) {
+    return <Loading />;
   }
 
   return (
@@ -129,24 +124,32 @@ export default function StreamHistoryPage() {
           <div className="flex items-center gap-3">
             <img
               alt="avatar"
-              src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
+              src={
+                user?.profile_picture ||
+                `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(user?.username || 'N'))}`
+              }
               className="h-12 w-12 rounded-xl ring-2 ring-white/10"
             />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">
+              <Link
+                className="text-lg font-semibold leading-tight hover:underline"
+                to={`/profiles/${user?.principal_id}`}
+              >
                 {user?.username}
-              </h1>
-              <p className="text-xs text-white/70">
-                FPS • Competitive • Coaching
-              </p>
+              </Link>
+              <div className="flex items-center gap-2 text-xs text-white/70">
+                <span>{tags.length ? tags.join(' • ') : '—'}</span>
+              </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {!isOwnProfile &&
-              (isFollowing ? (
+          {!isOwnProfile && (
+            <div className="flex items-center gap-2">
+              {isFollowing ? (
                 <button
                   className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
-                  onClick={() => handleUnfollow(streamHistoryId!)}
+                  onClick={() =>
+                    user?.principal_id && handleUnfollow(user.principal_id)
+                  }
                   disabled={unfollowLoading}
                 >
                   Unfollow
@@ -154,30 +157,34 @@ export default function StreamHistoryPage() {
               ) : (
                 <button
                   className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
-                  onClick={() => handleFollow(streamHistoryId!)}
+                  onClick={() =>
+                    user?.principal_id && handleFollow(user.principal_id)
+                  }
                   disabled={followLoading}
                 >
                   Follow
                 </button>
-              ))}
-            <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-              <Crown className="h-4 w-4" />
-              Subscribe
-            </button>
-            <button
-              className="rounded-xl border border-white/10 p-2 hover:border-white/20"
-              aria-label="Share"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
-            <button
-              className="rounded-xl border border-white/10 p-2 hover:border-white/20 sm:hidden"
-              onClick={() => setShowChat((s) => !s)}
-              aria-label="Toggle chat"
-            >
-              💬
-            </button>
-          </div>
+              )}
+              <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
+                <Crown className="h-4 w-4" />
+                Subscribe
+              </button>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
+                onClick={openDonate}
+              >
+                <DollarSign className="h-4 w-4" />
+                Donate
+              </button>
+              <button
+                className="rounded-xl border border-white/10 p-2 hover:border-white/20 sm:hidden"
+                onClick={() => setShowChat((s) => !s)}
+                aria-label="Toggle chat"
+              >
+                💬
+              </button>
+            </div>
+          )}
         </header>
 
         <section className="mt-4 grid gap-6 lg:grid-cols-3">
@@ -188,97 +195,62 @@ export default function StreamHistoryPage() {
             className="lg:col-span-2"
           >
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
+              <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase">
+                    <span className="block h-2 w-2 rounded-full bg-gray-400" />
+                    Offline
+                  </div>
+                  <div className="flex items-center gap-1 text-xs text-white/70">
+                    <UserIcon className="h-3 w-3" />
+                    <span className="font-medium">
+                      {formatNumberCompact(history?.totalView || 0)} views
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <VideoPlayer url={history.videoUrl} />
+
               <div className="border-t border-white/10 px-4 py-3">
-                <VideoPlayer url={streamHistory.videoUrl} />
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="min-w-0">
                     <p className="line-clamp-1 text-sm font-semibold">
-                      {streamHistory.title}
+                      {history.title}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {tags.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border border-white/10 px-3 py-1 text-[11px]"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-center gap-2">
-                  <button className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
-                    <Heart className="h-4 w-4" />
-                    Like
-                  </button>
-                  <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                    Clip
-                  </button>
-                  <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                    <Flag className="h-4 w-4" />
-                  </button>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {tags.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-full border border-white/10 px-3 py-1 text-[11px]"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
-                About {user?.username || 'NovaSpectre'}
+                About {user?.username}
               </div>
               <div className="px-4">
                 <div className="rounded-xl bg-gradient-to-r from-sky-500/10 via-blue-600/10 to-indigo-600/10 p-3 text-xs text-white/80">
-                  Competitive FPS streamer & coach. Fokus di scrims, ranked
-                  climb, dan VOD review. DM untuk collab; coaching setiap Kamis
-                  malam.
-                </div>
-                <div className="mt-3 grid gap-2">
-                  <div className="flex items-center gap-2 text-xs text-white/80">
-                    <MapPin className="h-4 w-4 text-white/70" />
-                    Jakarta • WIB (UTC+7)
-                  </div>
-                  <div className="flex items-center gap-2 text-xs text-white/80">
-                    <Calendar className="h-4 w-4 text-white/70" />
-                    Live 5×/week • 19:00–23:00
-                  </div>
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-white/10 px-2.5 py-1 text-[11px]"
-                    >
-                      {t}
-                    </span>
-                  ))}
+                  {user?.bio}
                 </div>
               </div>
-              <div className="mt-4 border-t border-white/10 px-4 py-3">
-                <div className="mb-2 text-sm font-semibold">Socials</div>
-                <div className="grid gap-2">
-                  {socials.map((s) => (
-                    <a
-                      key={s.label}
-                      href={s.url}
-                      className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 hover:border-white/20"
-                    >
-                      <div className="flex items-center gap-3">
-                        <s.icon className="h-4 w-4 text-white/80" />
-                        <div className="text-sm">{s.label}</div>
-                      </div>
-                      <div className="text-[11px] text-white/60 group-hover:text-white/70 truncate">
-                        {s.handle}
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-white/10 px-4 py-3">
+              <div className="border-t border-white/10 px-4 py-3 mt-3">
                 <div className="flex items-center justify-between text-xs text-white/80">
                   <span>
                     Followers:{' '}
-                    <span className="text-white/90 font-medium">340K</span>
+                    <span className="text-white/90 font-medium">
+                      {followersVal}
+                    </span>
                   </span>
                   <span>
                     Subscribers:{' '}
@@ -298,21 +270,35 @@ export default function StreamHistoryPage() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <img
-                    alt="avatar"
-                    src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
-                    className="h-6 w-6 rounded-md ring-2 ring-white/10"
-                  />
-                  <div className="text-sm font-semibold">Chat</div>
+                  <div className="text-sm font-semibold">Chat Replay</div>
                 </div>
               </div>
               <div className="h-[40rem] space-y-3 overflow-y-auto px-4 pb-4">
-                {streamHistory.messages?.map((m, i) => (
-                  <div key={i} className="text-xs">
-                    <span className="text-white/60">{m.senderID}:</span>{' '}
-                    <span className="text-white/90">{m.content}</span>
-                  </div>
-                ))}
+                {history.messages?.length ? (
+                  history.messages.map((m, i) => (
+                    <div key={i} className="text-xs">
+                      <span className="text-white/60">{m.senderID}:</span>{' '}
+                      <span className="text-white/90">{m.content}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-xs text-white/60">No messages.</div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 border-t border-white/10 p-3">
+                <div className="flex w-full items-center gap-2">
+                  <input
+                    disabled
+                    placeholder="Chat is disabled for VOD"
+                    className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40 opacity-60 cursor-not-allowed"
+                  />
+                  <button
+                    disabled
+                    className="rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold cursor-not-allowed opacity-60"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
             </div>
           </motion.aside>
@@ -320,6 +306,72 @@ export default function StreamHistoryPage() {
       </main>
 
       <Footer />
+
+      {donateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={closeDonate} />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-[#0E1320] p-5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">
+                Donate to {user?.username}
+              </h3>
+              <button
+                onClick={closeDonate}
+                className="rounded-lg border border-white/10 p-1 hover:border-white/20"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={submitDonate} className="mt-4 space-y-4">
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                <DollarSign className="h-4 w-4 opacity-80" />
+                <input
+                  inputMode="decimal"
+                  pattern="^[0-9]*[.]?[0-9]*$"
+                  value={donateAmount}
+                  onChange={(e) => setDonateAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-white/40"
+                />
+              </div>
+              {donateError && (
+                <div className="text-xs text-red-400">{donateError}</div>
+              )}
+              {!isAuthenticated && (
+                <div className="rounded-xl bg-yellow-500/10 p-2 text-xs text-yellow-300">
+                  You must sign in to donate.
+                </div>
+              )}
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeDonate}
+                  className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
+                  disabled={donating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isAuthenticated || donating}
+                  className={`rounded-xl px-3 py-2 text-xs font-semibold ${
+                    !isAuthenticated || donating
+                      ? 'bg-white/10 cursor-not-allowed opacity-60'
+                      : 'bg-gradient-to-r from-sky-500 to-blue-600'
+                  }`}
+                >
+                  {donating ? 'Processing...' : 'Donate'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
