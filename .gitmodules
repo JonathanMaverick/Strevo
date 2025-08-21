@@ -1,0 +1,9 @@
+[submodule "streaming-ai"]
+	path = streaming-ai
+	url = https://github.com/Remixingg/streaming-ai.git
+[submodule "streaming-backend"]
+	path = streaming-backend
+	url = https://github.com/JZ23-2/streaming-backend.git
+[submodule "streaming-server"]
+	path = streaming-server
+	url = https://github.com/JZ23-2/streaming-server.git
