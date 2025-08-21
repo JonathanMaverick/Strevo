@@ -6,7 +6,6 @@ export async function getAllStreamHistory(principalId: string) {
     const response = await axios.get(
       `${ENDPOINT}/all-stream?hostPrincipalID=${principalId}`,
     );
-    console.log('response is ', response.status);
     if (response.status !== HttpStatusCode.Ok) {
       return undefined;
     }
