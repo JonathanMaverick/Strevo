@@ -5,6 +5,7 @@ import {
   Crown,
   Users,
   Settings as SettingsIcon,
+  Heart,
 } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -17,6 +18,7 @@ import { useUserProfile } from '../services/user-profile.service';
 import { getStreamByStreamerID } from '../services/stream.service';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { Stream } from '../interfaces/stream';
+import DonationModal from '../components/DonationModal';
 
 export default function Profile() {
   const { principalId } = useParams();
@@ -40,6 +42,7 @@ export default function Profile() {
   const [activeTab, setActiveTab] = useState<'videos' | 'clips'>('videos');
   const [stream, setStream] = useState<Stream | undefined>();
   const [isLive, setIsLive] = useState(false);
+  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
 
   const fetchedForId = useRef<string | null>(null);
 
@@ -92,8 +95,7 @@ export default function Profile() {
       icon: Users as any,
       href: followersHref,
     },
-    { label: 'Subscribers', value: subsVal, icon: Crown as any },
-    { label: 'Live Avg', value: '—', icon: PlayCircle as any },
+    { label: 'Donations', value: subsVal, icon: Heart as any },
   ];
 
   const clips = Array.from({ length: 6 }).map((_, i) => ({
@@ -180,9 +182,12 @@ export default function Profile() {
                           Follow
                         </button>
                       ))}
-                    <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                      <Crown className="h-4 w-4" />
-                      Subscribe
+                    <button
+                      onClick={() => setIsDonationModalOpen(true)}
+                      className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
+                    >
+                      <Heart className="h-4 w-4" />
+                      Donate
                     </button>
                     {isOwnProfile && (
                       <Link
@@ -360,7 +365,7 @@ export default function Profile() {
           >
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
-                Recent Subscribers
+                Recent Donations
               </div>
               <div className="divide-y divide-white/5">
                 {(recentSubscribers?.length ? recentSubscribers : []).map(
@@ -387,7 +392,7 @@ export default function Profile() {
                 )}
                 {!recentSubscribers?.length && (
                   <div className="px-4 py-6 text-xs text-white/60">
-                    No subscribers yet
+                    No donations yet
                   </div>
                 )}
               </div>
@@ -416,6 +421,12 @@ export default function Profile() {
           </motion.aside>
         </section>
       </main>
+      <DonationModal
+        isOpen={isDonationModalOpen}
+        onClose={() => setIsDonationModalOpen(false)}
+        recipientPrincipalId={user?.principal_id || ''}
+        recipientUsername={user?.username}
+      />
       <Footer />
     </div>
   );
