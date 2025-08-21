@@ -56,22 +56,28 @@ export function VideoPlayer({ url }: { url: string }) {
     const video = videoRef.current;
     if (!video) return;
 
-    if (muted) {
+    if (video.muted || video.volume === 0) {
       video.muted = false;
-      video.volume = previousVolume;
+      video.volume = previousVolume > 0 ? previousVolume : 0.5;
     } else {
       setPreviousVolume(video.volume);
       video.muted = true;
     }
   };
 
-  const handleVolumeChange = (newVolume: number) => {
+  // Renamed to avoid conflict with event handler
+  const handleVolumeSliderChange = (newVolume: number) => {
     const video = videoRef.current;
     if (!video) return;
 
     video.volume = newVolume;
     video.muted = newVolume === 0;
-    if (newVolume > 0) setPreviousVolume(newVolume);
+    setVolume(newVolume);
+    setMuted(newVolume === 0);
+    
+    if (newVolume > 0) {
+      setPreviousVolume(newVolume);
+    }
   };
 
   const toggleFullscreen = async () => {
@@ -97,11 +103,15 @@ export function VideoPlayer({ url }: { url: string }) {
 
     const handleTimeUpdate = () => {
       setCurrentTime(video.currentTime);
-      setProgress((video.currentTime / video.duration) * 100);
+      if (video.duration && !isNaN(video.duration)) {
+        setProgress((video.currentTime / video.duration) * 100);
+      }
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(video.duration);
+      if (video.duration && !isNaN(video.duration)) {
+        setDuration(video.duration);
+      }
     };
 
     video.addEventListener('timeupdate', handleTimeUpdate);
@@ -126,6 +136,7 @@ export function VideoPlayer({ url }: { url: string }) {
 
   // 🕒 format time helper
   const formatTime = (time: number) => {
+    if (isNaN(time) || !isFinite(time)) return '0:00';
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -135,20 +146,31 @@ export function VideoPlayer({ url }: { url: string }) {
     const video = videoRef.current;
     if (!video) return;
 
-    const handleLoadStart = () => setIsLoading(true);
+    const handleLoadStart = () => {
+      setIsLoading(true);
+      setVideoError(null);
+    };
+    
     const handleLoadedData = () => {
       setIsLoading(false);
       setVideoError(null);
     };
+    
     const handleError = () => {
       setIsLoading(false);
       setVideoError('Failed to load video. Please try again.');
     };
+    
     const handlePlaying = () => {
       setIsLoading(false);
       setPlaying(true);
     };
+    
     const handlePause = () => setPlaying(false);
+    
+    const handleWaiting = () => setIsLoading(true);
+    
+    // Fixed volume change event handler
     const handleVolumeChangeEvent = () => {
       setVolume(video.volume);
       setMuted(video.muted);
@@ -159,6 +181,7 @@ export function VideoPlayer({ url }: { url: string }) {
     video.addEventListener('error', handleError);
     video.addEventListener('playing', handlePlaying);
     video.addEventListener('pause', handlePause);
+    video.addEventListener('waiting', handleWaiting);
     video.addEventListener('volumechange', handleVolumeChangeEvent);
 
     return () => {
@@ -167,6 +190,7 @@ export function VideoPlayer({ url }: { url: string }) {
       video.removeEventListener('error', handleError);
       video.removeEventListener('playing', handlePlaying);
       video.removeEventListener('pause', handlePause);
+      video.removeEventListener('waiting', handleWaiting);
       video.removeEventListener('volumechange', handleVolumeChangeEvent);
     };
   }, []);
@@ -178,6 +202,15 @@ export function VideoPlayer({ url }: { url: string }) {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () =>
       document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
   }, []);
 
   return (
@@ -243,7 +276,7 @@ export function VideoPlayer({ url }: { url: string }) {
             step="0.1"
             value={progress}
             onChange={handleSeek}
-            className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+            className="flex-1 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
             style={{
               background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${progress}%, rgba(255,255,255,0.2) ${progress}%, rgba(255,255,255,0.2) 100%)`,
             }}
@@ -291,9 +324,9 @@ export function VideoPlayer({ url }: { url: string }) {
                     step="0.05"
                     value={muted ? 0 : volume}
                     onChange={(e) =>
-                      handleVolumeChange(parseFloat(e.target.value))
+                      handleVolumeSliderChange(parseFloat(e.target.value))
                     }
-                    className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                    className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
                     style={{
                       background: `linear-gradient(to right, #3B82F6 0%, #3B82F6 ${
                         (muted ? 0 : volume) * 100
