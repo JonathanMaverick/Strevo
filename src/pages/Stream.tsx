@@ -1,66 +1,23 @@
-import React, {
-  FormEvent,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from 'react';
-import { motion, statsBuffer } from 'framer-motion';
-import {
-  Play,
-  Pause,
-  Volume2,
-  VolumeX,
-  Maximize2,
-  Settings,
-  Share2,
-  Heart,
-  Flag,
-  Send,
-  Smile,
-  MapPin,
-  Calendar,
-  Youtube,
-  Twitter,
-  Instagram,
-  Twitch,
-  Globe,
-  Mail,
-  Crown,
-  AlertCircle,
-  Loader2,
-  Eye,
-  User,
-} from 'lucide-react';
+import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Crown, User, Send, X, DollarSign } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChatMessage } from '../interfaces/chat-message';
 import { SocketMessage } from '../interfaces/socket-message';
 import { SocketMessageType } from '../enums/socket-message-type';
-import Hls from 'hls.js';
 import { useAuth } from '../contexts/auth.context';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { useUserProfile } from '../services/user-profile.service';
 import { useFollowing } from '../services/follow.service';
 import Loading from './Loading';
-import { Stream } from "../interfaces/stream";
-import { getStreamByStreamerID } from "../services/stream.service";
-
-const QUALITY_OPTIONS = [
-  { label: '1080p', value: '1080p' },
-  { label: '720p', value: '720p' },
-  { label: '480p', value: '480p' },
-  { label: 'Auto', value: 'auto' },
-];
+import { Stream } from '../interfaces/stream';
+import { getStreamByStreamerID } from '../services/stream.service';
 
 const formatViewerCount = (count: number) => {
-  if (count >= 1000000) {
-    return `${(count / 1000000).toFixed(1)}M`;
-  } else if (count >= 1000) {
-    return `${(count / 1000).toFixed(1)}K`;
-  }
+  if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}K`;
   return count.toString();
 };
 
@@ -68,7 +25,7 @@ export default function StreamPage() {
   const { principalId } = useParams();
   const { stats, user, loadProfile, isProfileLoaded, isOwnProfile } =
     useUserProfile(principalId);
-  const { user: currentUser, userLoading } = useAuth();
+  const { user: currentUser } = useAuth();
   const {
     isFollowing,
     handleFollow,
@@ -85,6 +42,13 @@ export default function StreamPage() {
   const messageInputRef = useRef<HTMLInputElement>(null!);
   const [viewerCount, setViewerCount] = useState(0);
   const [stream, setStream] = useState<Stream | undefined>();
+  const [donateOpen, setDonateOpen] = useState(false);
+  const [donateAmount, setDonateAmount] = useState<string>('');
+  const [donateError, setDonateError] = useState<string>('');
+  const [donating, setDonating] = useState(false);
+
+  const isAuthenticated = !!currentUser;
+
   const followersVal =
     typeof stats?.followersCount === 'number'
       ? stats.followersCount >= 1000
@@ -92,27 +56,32 @@ export default function StreamPage() {
         : `${stats.followersCount}`
       : '—';
 
+  const tags = useMemo(() => {
+    const raw = stream?.categoryName?.trim() || '';
+    if (!raw) return [];
+    return raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }, [stream?.categoryName]);
+
   const handleIncomingMessage = (data: ChatMessage) => {
     setChatMessages((prev) => [...prev, data]);
   };
 
   const handleSendMessage = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    if (!isAuthenticated || !user) return;
     const content = messageInputRef.current.value.trim();
     if (content.length === 0) return;
-
     const payload: SocketMessage<ChatMessage> = {
       type: SocketMessageType.ChatMessage,
       data: {
         userId: currentUser!.principal_id,
-        streamId: user!.principal_id,
+        streamId: user.principal_id,
         content,
       },
     };
-
-    console.log(payload);
-
     socketRef.current.send(JSON.stringify(payload));
     messageInputRef.current.value = '';
   };
@@ -123,10 +92,9 @@ export default function StreamPage() {
       return;
     }
     loadProfile(principalId);
-    getStreamByStreamerID(principalId).then((stream) => {
-      if (stream) setStream(stream);
-    })
-
+    getStreamByStreamerID(principalId).then((s) => {
+      if (s) setStream(s);
+    });
     socketRef.current = new WebSocket(
       `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`,
     );
@@ -141,38 +109,42 @@ export default function StreamPage() {
           break;
       }
     };
-
     return () => {
       socketRef.current?.close();
     };
   }, []);
 
   useEffect(() => {
-    if (user) {
-      checkFollowingStatus(user.principal_id);
+    if (user) checkFollowingStatus(user.principal_id);
+  }, [user]);
+
+  const openDonate = () => {
+    setDonateAmount('');
+    setDonateError('');
+    setDonateOpen(true);
+  };
+
+  const closeDonate = () => {
+    if (donating) return;
+    setDonateOpen(false);
+  };
+
+  const submitDonate = (e: FormEvent) => {
+    e.preventDefault();
+    const amt = Number(donateAmount);
+    if (isNaN(amt) || amt <= 0) {
+      setDonateError('Please enter a valid amount greater than 0.');
+      return;
     }
+    setDonateError('');
+    setDonating(true);
+    setTimeout(() => {
+      setDonating(false);
+      setDonateOpen(false);
+    }, 600);
+  };
 
-  }, [user])
-
-  const tags = ['FPS', 'Ranked', 'Scrims', 'Coaching', 'Analysis'];
-
-  const socials = [
-    { label: 'YouTube', url: '#', handle: '@NovaSpectre', icon: Youtube },
-    { label: 'X (Twitter)', url: '#', handle: '@novaspectre', icon: Twitter },
-    { label: 'Instagram', url: '#', handle: '@nova.gg', icon: Instagram },
-    { label: 'Twitch', url: '#', handle: 'novaspectre', icon: Twitch },
-    { label: 'Website', url: '#', handle: 'novaspectre.gg', icon: Globe },
-    {
-      label: 'Business',
-      url: 'mailto:contact@novaspectre.gg',
-      handle: 'contact@novaspectre.gg',
-      icon: Mail,
-    },
-  ];
-
-  if (!isProfileLoaded) {
-    return <Loading />;
-  }
+  if (!isProfileLoaded) return <Loading />;
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">
@@ -191,24 +163,30 @@ export default function StreamPage() {
           <div className="flex items-center gap-3">
             <img
               alt="avatar"
-              src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
+              src={
+                user?.profile_picture ||
+                `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(user?.username || 'N'))}`
+              }
               className="h-12 w-12 rounded-xl ring-2 ring-white/10"
             />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">
+              <Link
+                className="text-lg font-semibold leading-tight hover:underline"
+                to={`/profiles/${user?.principal_id}`}
+              >
                 {user?.username}
-              </h1>
+              </Link>
               <div className="flex items-center gap-2 text-xs text-white/70">
-                <span>FPS • Competitive • Coaching</span>
+                <span>{tags.length ? tags.join(' • ') : '—'}</span>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {!isOwnProfile &&
-              (isFollowing ? (
+          {isAuthenticated && !isOwnProfile && (
+            <div className="flex items-center gap-2">
+              {isFollowing ? (
                 <button
                   className="rounded-xl border border-white/10 px-3 py-2 text-xs font-semibold cursor-pointer"
-                  onClick={() => handleUnfollow(principalId!)}
+                  onClick={() => principalId && handleUnfollow(principalId)}
                   disabled={unfollowLoading}
                 >
                   Unfollow
@@ -216,30 +194,32 @@ export default function StreamPage() {
               ) : (
                 <button
                   className="rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold cursor-pointer"
-                  onClick={() => handleFollow(principalId!)}
+                  onClick={() => principalId && handleFollow(principalId)}
                   disabled={followLoading}
                 >
                   Follow
                 </button>
-              ))}
-            <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-              <Crown className="h-4 w-4" />
-              Subscribe
-            </button>
-            <button
-              className="rounded-xl border border-white/10 p-2 hover:border-white/20"
-              aria-label="Share"
-            >
-              <Share2 className="h-4 w-4" />
-            </button>
-            <button
-              className="rounded-xl border border-white/10 p-2 hover:border-white/20 sm:hidden"
-              onClick={() => setShowChat((s) => !s)}
-              aria-label="Toggle chat"
-            >
-              💬
-            </button>
-          </div>
+              )}
+              <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
+                <Crown className="h-4 w-4" />
+                Subscribe
+              </button>
+              <button
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
+                onClick={openDonate}
+              >
+                <DollarSign className="h-4 w-4" />
+                Donate
+              </button>
+              <button
+                className="rounded-xl border border-white/10 p-2 hover:border-white/20 sm:hidden"
+                onClick={() => setShowChat((s) => !s)}
+                aria-label="Toggle chat"
+              >
+                💬
+              </button>
+            </div>
+          )}
         </header>
 
         <section className="mt-4 grid gap-6 lg:grid-cols-3">
@@ -268,6 +248,7 @@ export default function StreamPage() {
                   )}
                 </div>
               </div>
+
               <HLSVideoPlayer
                 setIsLive={setIsLive}
                 url={`${process.env.VITE_STREAMING_SERVER_URL}/watch/${user?.principal_id}/index.m3u8`}
@@ -280,29 +261,18 @@ export default function StreamPage() {
                       {stream?.title}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {tags.map((t) => (
-                      <span
-                        key={t}
-                        className="rounded-full border border-white/10 px-3 py-1 text-[11px]"
-                      >
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="mt-3 flex items-center gap-2">
-                  <button className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
-                    <Heart className="h-4 w-4" />
-                    Like
-                  </button>
-                  <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                    Clip
-                  </button>
-                  <button className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                    <Flag className="h-4 w-4" />
-                  </button>
+                  {tags.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2">
+                      {tags.map((t) => (
+                        <span
+                          key={t}
+                          className="rounded-full border border-white/10 px-3 py-1 text-[11px]"
+                        >
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -315,42 +285,14 @@ export default function StreamPage() {
                 <div className="rounded-xl bg-gradient-to-r from-sky-500/10 via-blue-600/10 to-indigo-600/10 p-3 text-xs text-white/80">
                   {user?.bio}
                 </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  {tags.map((t) => (
-                    <span
-                      key={t}
-                      className="rounded-full border border-white/10 px-2.5 py-1 text-[11px]"
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
               </div>
-              <div className="mt-4 border-t border-white/10 px-4 py-3">
-                <div className="mb-2 text-sm font-semibold">Socials</div>
-                <div className="grid gap-2">
-                  {socials.map((s) => (
-                    <a
-                      key={s.label}
-                      href={s.url}
-                      className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 hover:border-white/20"
-                    >
-                      <div className="flex items-center gap-3">
-                        <s.icon className="h-4 w-4 text-white/80" />
-                        <div className="text-sm">{s.label}</div>
-                      </div>
-                      <div className="text-[11px] text-white/60 group-hover:text-white/70 truncate">
-                        {s.handle}
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </div>
-              <div className="border-t border-white/10 px-4 py-3">
+              <div className="border-t border-white/10 px-4 py-3 mt-3">
                 <div className="flex items-center justify-between text-xs text-white/80">
                   <span>
                     Followers:{' '}
-                    <span className="text-white/90 font-medium">{followersVal }</span>
+                    <span className="text-white/90 font-medium">
+                      {followersVal}
+                    </span>
                   </span>
                   <span>
                     Subscribers:{' '}
@@ -370,11 +312,6 @@ export default function StreamPage() {
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center gap-2">
-                  <img
-                    alt="avatar"
-                    src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg('N'))}`}
-                    className="h-6 w-6 rounded-md ring-2 ring-white/10"
-                  />
                   <div className="text-sm font-semibold">Chat</div>
                 </div>
               </div>
@@ -387,25 +324,32 @@ export default function StreamPage() {
                 ))}
               </div>
               <div className="flex items-center gap-2 border-t border-white/10 p-3">
-                <button className="rounded-lg bg-white/10 p-2">
-                  <Smile className="h-4 w-4" />
-                </button>
-                <form
-                  onSubmit={handleSendMessage}
-                  className="flex w-full items-center gap-2"
-                >
-                  <input
-                    ref={messageInputRef}
-                    placeholder="Send a message"
-                    className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold"
+                {!isAuthenticated ? (
+                  <div className="flex w-full items-center gap-2">
+                    <input
+                      disabled
+                      placeholder="Sign in to chat"
+                      className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40 opacity-60 cursor-not-allowed"
+                    />
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={handleSendMessage}
+                    className="flex w-full items-center gap-2"
                   >
-                    <Send className="h-4 w-4" />
-                  </button>
-                </form>
+                    <input
+                      ref={messageInputRef}
+                      placeholder="Send a message"
+                      className="flex-1 rounded-lg bg-white/5 px-3 py-2 text-xs outline-none placeholder:text-white/40"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </form>
+                )}
               </div>
             </div>
           </motion.aside>
@@ -413,6 +357,72 @@ export default function StreamPage() {
       </main>
 
       <Footer />
+
+      {donateOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/60" onClick={closeDonate} />
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.2 }}
+            className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-[#0E1320] p-5 shadow-2xl"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold">
+                Donate to {user?.username}
+              </h3>
+              <button
+                onClick={closeDonate}
+                className="rounded-lg border border-white/10 p-1 hover:border-white/20"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <form onSubmit={submitDonate} className="mt-4 space-y-4">
+              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                <DollarSign className="h-4 w-4 opacity-80" />
+                <input
+                  inputMode="decimal"
+                  pattern="^[0-9]*[.]?[0-9]*$"
+                  value={donateAmount}
+                  onChange={(e) => setDonateAmount(e.target.value)}
+                  placeholder="Enter amount"
+                  className="w-full bg-transparent text-sm outline-none placeholder:text-white/40"
+                />
+              </div>
+              {donateError && (
+                <div className="text-xs text-red-400">{donateError}</div>
+              )}
+              {!isAuthenticated && (
+                <div className="rounded-xl bg-yellow-500/10 p-2 text-xs text-yellow-300">
+                  You must sign in to donate.
+                </div>
+              )}
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={closeDonate}
+                  className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
+                  disabled={donating}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!isAuthenticated || donating}
+                  className={`rounded-xl px-3 py-2 text-xs font-semibold ${
+                    !isAuthenticated || donating
+                      ? 'bg-white/10 cursor-not-allowed opacity-60'
+                      : 'bg-gradient-to-r from-sky-500 to-blue-600'
+                  }`}
+                >
+                  {donating ? 'Processing...' : 'Donate'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { getAllActiveStream } from '../services/stream.service';
 import { StreamVideoCard } from '../components/StreamVideoCard';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { User } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 function formatViewerCount(count: number) {
   if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
@@ -85,12 +86,18 @@ export default function Home() {
               <div className="border-t border-white/10 px-4 py-3">
                 <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div className="min-w-0">
-                    <p className="line-clamp-1 text-sm font-semibold">
+                    <Link
+                      to={`/stream/${topStream.hostPrincipalID}`}
+                      className="line-clamp-1 text-sm font-semibold hover:underline text-white/90"
+                    >
                       {topStream.title}
-                    </p>
-                    <p className="mt-1 text-xs text-white/60">
+                    </Link>
+                    <Link
+                      to={`/profiles/${topStream.hostPrincipalID}`}
+                      className="mt-1 text-xs text-white/60 hover:underline"
+                    >
                       {topStream.hostPrincipalID}
-                    </p>
+                    </Link>
                   </div>
                   <div className="rounded-md bg-white/5 px-2 py-1 text-[10px]">
                     1080p • 60fps
@@ -144,13 +151,13 @@ export default function Home() {
             </motion.aside>
           </div>
         )}
-
+        {/* 
         <h2 className="mt-10 text-xl font-semibold">Trending</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {sortedStreams.map((stream) => (
             <StreamVideoCard key={stream.streamId} stream={stream} />
           ))}
-        </div>
+        </div> */}
 
         <h2 className="mt-10 text-xl font-semibold">Recommended</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
