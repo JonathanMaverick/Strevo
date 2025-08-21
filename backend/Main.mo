@@ -55,7 +55,7 @@ persistent actor Main {
                     profile_picture = userData.profile_picture;
                     created_at = Time.now(); 
                     streaming_key = userData.streaming_key;
-                    bio = ?"Tell's something about you";
+                    bio = ?"Tells something about you";
                 };
                 tree.put(principal_id, newUser);
                 #ok(userData)
