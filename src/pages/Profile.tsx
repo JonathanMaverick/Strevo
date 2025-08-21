@@ -48,22 +48,15 @@ export default function Profile() {
     if (fetchedForId.current === principalId) return;
     fetchedForId.current = principalId;
 
-    let cancelled = false;
-
     Promise.all([
       getAllStreamHistory(principalId),
       getStreamByStreamerID(principalId),
     ]).then(([history, s]) => {
-      if (cancelled) return;
       if (history) setStreamHistory(history);
       if (s) setStream(s);
     });
 
     checkFollowingStatus(principalId);
-
-    return () => {
-      cancelled = true;
-    };
   }, [principalId]);
 
   if (isLoading || !isProfileLoaded) return <Loading />;
