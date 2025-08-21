@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Crown, User, Send, X, DollarSign } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ChatMessage } from '../interfaces/chat-message';
 import { SocketMessage } from '../interfaces/socket-message';
 import { SocketMessageType } from '../enums/socket-message-type';
@@ -167,9 +167,12 @@ export default function StreamPage() {
               className="h-12 w-12 rounded-xl ring-2 ring-white/10"
             />
             <div>
-              <h1 className="text-lg font-semibold leading-tight">
+              <Link
+                className="text-lg font-semibold leading-tight hover:underline"
+                to={`/profiles/${user?.principal_id}`}
+              >
                 {user?.username}
-              </h1>
+              </Link>
               <div className="flex items-center gap-2 text-xs text-white/70">
                 <span>{tags.length ? tags.join(' • ') : '—'}</span>
               </div>
