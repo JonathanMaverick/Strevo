@@ -26,4 +26,4 @@ COPY --from=build /app ./
 
 EXPOSE 3000 4943
 
-CMD bash -lc "dfx start --background --host 0.0.0.0:4943 && dfx deploy && npm run setup && npm run start"
+CMD bash -lc "dfx start --background --clean && dfx deploy && npm run setup && npm run start"

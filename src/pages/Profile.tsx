@@ -51,7 +51,7 @@ export default function Profile() {
         if (s) setStream(s);
       });
     }
-  }, [user, checkFollowingStatus]);
+  }, [user]);
 
   if (isLoading || !isProfileLoaded) return <Loading />;
 
