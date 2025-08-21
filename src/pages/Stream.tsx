@@ -107,11 +107,10 @@ export default function StreamPage() {
       data: {
         userId: currentUser!.principal_id,
         streamId: user!.principal_id,
+        username: user!.username,
         content,
       },
     };
-
-    console.log(payload);
 
     socketRef.current.send(JSON.stringify(payload));
     messageInputRef.current.value = '';
@@ -381,7 +380,7 @@ export default function StreamPage() {
               <div className="h-[40rem] space-y-3 overflow-y-auto px-4 pb-4">
                 {chatMessages.map((m, i) => (
                   <div key={i} className="text-xs">
-                    <span className="text-white/60">{m.userId}:</span>{' '}
+                    <span className="text-white/60">{m.username}:</span>{' '}
                     <span className="text-white/90">{m.content}</span>
                   </div>
                 ))}
