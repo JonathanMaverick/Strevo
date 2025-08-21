@@ -92,15 +92,12 @@ export default function DonationModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
         onClick={handleClose}
       />
 
-      {/* Modal */}
       <div className="relative bg-[#1A1F2E] border border-gray-700 rounded-xl p-6 w-full max-w-md mx-auto shadow-2xl">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <Heart className="h-6 w-6 text-red-500" />

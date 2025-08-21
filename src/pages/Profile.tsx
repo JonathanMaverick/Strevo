@@ -138,7 +138,7 @@ export default function Profile() {
             <div className="absolute inset-0 bg-[radial-gradient(50rem_20rem_at_80%_70%,rgba(14,165,233,0.25),transparent)]" />
           </div>
           <div className="flex flex-col gap-4 px-4 pb-4 sm:px-6 sm:pb-6">
-            <div className="-mt-10 flex items-end gap-4 z-[100]">
+            <div className="-mt-10 flex items-end gap-4 z-[30]">
               <img
                 alt="avatar"
                 src={avatarUrl}
