@@ -24,8 +24,14 @@ import { useUserProfile } from '../services/user-profile.service';
 
 export default function Profile() {
   const { principalId } = useParams();
-  const { stats, user, isProfileLoaded, isLoading, isOwnProfile } =
-    useUserProfile(principalId);
+  const {
+    stats,
+    user,
+    isProfileLoaded,
+    isLoading,
+    isOwnProfile,
+    recentSubscribers,
+  } = useUserProfile(principalId);
   const [streamHistory, setStreamHistory] = useState<StreamHistory[]>([]);
   const {
     isFollowing,
@@ -40,34 +46,34 @@ export default function Profile() {
   >('videos');
 
   useEffect(() => {
-    console.log(isFollowing, 'fdfd');
-  }, [isFollowing])
-
-  useEffect(() => {
     if (user) {
       getAllStreamHistory(user.principal_id).then((history) => {
-        if (history) {
-          setStreamHistory(history);
-        }
+        if (history) setStreamHistory(history);
       });
-      checkFollowingStatus(user.principal_id).then(s => console.log('dfdf', s));
+      checkFollowingStatus(user.principal_id);
     }
-  }, [user]);
+  }, [user, checkFollowingStatus]);
 
-  if (isLoading || !isProfileLoaded) {
-    return <Loading />;
-  }
+  if (isLoading || !isProfileLoaded) return <Loading />;
 
   const displayName = user?.username || 'Your Name';
-  const bio = user?.bio || "Tell a world about yourself!"
+  const bio = user?.bio || 'Tell a world about yourself!';
   const avatarUrl =
     user?.profile_picture ||
     `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((displayName?.[0] || 'U').toUpperCase()))}`;
+
   const followersVal =
     typeof stats?.followersCount === 'number'
       ? stats.followersCount >= 1000
         ? `${(stats.followersCount / 1000).toFixed(1)}K`
         : `${stats.followersCount}`
+      : '—';
+
+  const subsVal =
+    typeof stats?.subscribersCount === 'number'
+      ? stats.subscribersCount >= 1000
+        ? `${(stats.subscribersCount / 1000).toFixed(1)}K`
+        : `${stats.subscribersCount}`
       : '—';
 
   const followersHref = user?.principal_id
@@ -78,20 +84,12 @@ export default function Profile() {
     {
       label: 'Followers',
       value: followersVal,
-      icon: Users,
+      icon: Users as any,
       href: followersHref,
     },
-    { label: 'Subscribers', value: '—', icon: Crown },
-    { label: 'Live Avg', value: '—', icon: PlayCircle },
+    { label: 'Subscribers', value: subsVal, icon: Crown as any },
+    { label: 'Live Avg', value: '—', icon: PlayCircle as any },
   ];
-
-  const videos = Array.from({ length: 8 }).map((_, i) => ({
-    title: `Video #${i + 1}`,
-    views: '—',
-    length: '—',
-    tag: ['FPS', 'Ranked', 'Coaching'][i % 3],
-    color: 'from-slate-700 via-slate-800 to-black',
-  }));
 
   const clips = Array.from({ length: 6 }).map((_, i) => ({
     title: `Clip #${i + 1}`,
@@ -119,7 +117,6 @@ export default function Profile() {
         <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-gradient-to-tr from-blue-600/30 via-sky-500/20 to-cyan-400/20 blur-3xl" />
         <div className="absolute -bottom-40 -right-40 h-[28rem] w-[28rem] rounded-full bg-gradient-to-tr from-indigo-600/25 via-blue-600/20 to-sky-400/10 blur-[100px]" />
       </div>
-
       <Navbar />
       <main className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <section className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] overflow-visible">
@@ -127,7 +124,6 @@ export default function Profile() {
             <div className="absolute inset-0 bg-[radial-gradient(60rem_25rem_at_20%_20%,rgba(59,130,246,0.25),transparent)]" />
             <div className="absolute inset-0 bg-[radial-gradient(50rem_20rem_at_80%_70%,rgba(14,165,233,0.25),transparent)]" />
           </div>
-
           <div className="flex flex-col gap-4 px-4 pb-4 sm:px-6 sm:pb-6">
             <div className="-mt-10 flex items-end gap-4 z-[100]">
               <img
@@ -144,7 +140,10 @@ export default function Profile() {
                     <p className="mt-1 text-sm text-white/70">{bio}</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2 sm:mt-0">
-                    <a className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold" href={`/stream/${user?.principal_id}`}>
+                    <a
+                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold"
+                      href={`/stream/${user?.principal_id}`}
+                    >
                       <PlayCircle className="h-4 w-4" />
                       Watch Live
                     </a>
@@ -193,7 +192,6 @@ export default function Profile() {
                 </div>
               </div>
             </div>
-
             <div className="mt-2 grid gap-3 sm:grid-cols-3">
               {statsCards.map((s, i) => {
                 const Card = (
@@ -271,7 +269,7 @@ export default function Profile() {
                     key={t.key}
                     onClick={() => setActiveTab(t.key as typeof activeTab)}
                     className={`rounded-full border px-3 py-1.5 text-xs ${
-                      activeTab === t.key
+                      activeTab === (t.key as any)
                         ? 'border-white/20 bg-white/10 font-semibold'
                         : 'border-white/10 text-white/80 hover:border-white/20 hover:text-white'
                     }`}
@@ -284,39 +282,43 @@ export default function Profile() {
               <div className="mt-4">
                 {activeTab === 'videos' && (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {streamHistory.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map((v, i) => (
-                      <a
-                        key={i}
-                        href={`/stream-history/${v.streamHistoryID}`}
-                        className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
-                      >
-                        <div
-                          className={`relative aspect-video w-full bg-[url(${v.thumbnail})]`}
+                    {streamHistory
+                      .sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() -
+                          new Date(a.createdAt).getTime(),
+                      )
+                      .map((v, i) => (
+                        <a
+                          key={i}
+                          href={`/stream-history/${v.streamHistoryID}`}
+                          className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
                         >
-                          <img
-                            src={v.thumbnail}
-                            alt={v.title}
-                            className="absolute inset-0 h-full w-full object-cover"
-                          />
-                          <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {v.categoryName}
+                          <div className="relative aspect-video w-full">
+                            <img
+                              src={v.thumbnail}
+                              alt={v.title}
+                              className="absolute inset-0 h-full w-full object-cover"
+                            />
+                            <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                              {v.categoryName}
+                            </div>
+                            <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                              {new Date(v.duration * 1000)
+                                .toISOString()
+                                .slice(11, 19)}
+                            </div>
                           </div>
-                          <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {new Date(v.duration * 1000)
-                              .toISOString()
-                              .slice(11, 19)}
+                          <div className="p-3">
+                            <p className="line-clamp-1 text-sm font-medium">
+                              {v.title}
+                            </p>
+                            <p className="mt-1 text-xs text-white/60">
+                              {v.totalView} views
+                            </p>
                           </div>
-                        </div>
-                        <div className="p-3">
-                          <p className="line-clamp-1 text-sm font-medium">
-                            {v.title}
-                          </p>
-                          <p className="mt-1 text-xs text-white/60">
-                            {v.totalView} views
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                        </a>
+                      ))}
                   </div>
                 )}
 
@@ -377,7 +379,8 @@ export default function Profile() {
                         </div>
                       </div>
                       <div className="text-[10px] text-white/60 flex items-center gap-1">
-                        <Clock className="h-3.5 w-3.5" /> WIB
+                        <Clock className="h-3.5 w-3.5" />
+                        WIB
                       </div>
                     </div>
                     <div className="divide-y divide-white/5">
@@ -446,26 +449,35 @@ export default function Profile() {
 
             <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="px-4 py-3 text-sm font-semibold">
-                Recent Supporters
+                Recent Subscribers
               </div>
               <div className="divide-y divide-white/5">
-                {['salsa', 'beatlab', 'stacksmith', 'cozyroom', 'winaaa'].map(
-                  (n, i) => (
+                {(recentSubscribers?.length ? recentSubscribers : []).map(
+                  (s, i) => (
                     <div
-                      key={i}
+                      key={s.principal_id + i}
                       className="flex items-center justify-between px-4 py-3"
                     >
                       <div className="flex items-center gap-3">
                         <img
-                          alt="avatar"
-                          src={`data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(n[0].toUpperCase()))}`}
-                          className="h-7 w-7 rounded-full ring-2 ring-white/10"
+                          alt={s.username}
+                          src={
+                            s.avatar && s.avatar.length > 0
+                              ? s.avatar
+                              : `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg(s.username?.[0]?.toUpperCase() || 'U'))}`
+                          }
+                          className="h-7 w-7 rounded-full ring-2 ring-white/10 object-cover"
                         />
-                        <div className="text-sm">{n}</div>
+                        <div className="text-sm">{s.username}</div>
                       </div>
                       <div className="text-[10px] text-white/60">Sub</div>
                     </div>
                   ),
+                )}
+                {!recentSubscribers?.length && (
+                  <div className="px-4 py-6 text-xs text-white/60">
+                    No subscribers yet
+                  </div>
                 )}
               </div>
             </div>
@@ -490,7 +502,6 @@ export default function Profile() {
           </motion.aside>
         </section>
       </main>
-
       <Footer />
     </div>
   );
