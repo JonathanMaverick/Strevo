@@ -144,13 +144,13 @@ export default function Home() {
             </motion.aside>
           </div>
         )}
-
+        {/* 
         <h2 className="mt-10 text-xl font-semibold">Trending</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {sortedStreams.map((stream) => (
             <StreamVideoCard key={stream.streamId} stream={stream} />
           ))}
-        </div>
+        </div> */}
 
         <h2 className="mt-10 text-xl font-semibold">Recommended</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

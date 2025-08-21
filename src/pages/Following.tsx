@@ -435,7 +435,7 @@ function ChannelLiveCard({ c }: { c: Channel }) {
 function ChannelOfflineCard({ c }: { c: Channel }) {
   return (
     <a
-      href={`/profile/${c.principalId}`}
+      href={`/profiles/${c.principalId}`}
       className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
     >
       <div
