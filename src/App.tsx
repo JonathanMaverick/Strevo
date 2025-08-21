@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Home from './pages/Home';
 import Profile from './pages/Profile';
 import Following from './pages/Following';
-import StreamPage from './pages/Stream';
+import Stream from './pages/Stream';
 
 import '@connect2ic/core/style.css';
 import { createClient } from '@connect2ic/core';
@@ -16,12 +16,13 @@ import { Connect2ICProvider } from '@connect2ic/react';
 import { SocketProvider } from './contexts/socket.context';
 import { ToastProvider } from './contexts/toast.context';
 import Settings from './pages/Settings';
-import Followers from './pages/Followers';
 import { AuthProvider } from './contexts/auth.context';
 import StreamExample from './pages/stream-example';
 import StreamHistoryPage from './pages/StreamHistory';
 import EditStreamInfo from './pages/EditStreamInfo';
 import StartStream from './pages/StartStream';
+import ProfileFollowers from './pages/ProfileFollowers';
+import ProfileFollowing from './pages/ProfileFollowing';
 
 function App() {
   const client = createClient({
@@ -57,7 +58,7 @@ function App() {
                 <Route path="/following" element={<Following />} />
                 <Route path="/start-stream" element={<StartStream />} />
                 <Route path="/edit-stream-info" element={<EditStreamInfo />} />
-                <Route path="/stream/:principalId" element={<StreamPage />} />
+                <Route path="/stream/:principalId" element={<Stream />} />
                 <Route
                   path="/stream-history/:streamHistoryId"
                   element={<StreamHistoryPage />}
@@ -68,8 +69,12 @@ function App() {
                 />
                 <Route path="/settings" element={<Settings />} />
                 <Route
+                  path="/profiles/:principalId/following"
+                  element={<ProfileFollowing />}
+                />
+                <Route
                   path="/profiles/:principalId/followers"
-                  element={<Followers />}
+                  element={<ProfileFollowers />}
                 />
               </Routes>
             </SocketProvider>

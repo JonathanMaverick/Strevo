@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Users, ArrowLeft } from 'lucide-react';
-import { FollowersInterface } from '../interfaces/following';
+import { FollowingInterface } from '../interfaces/following';
 import { useUserProfile } from '../services/user-profile.service';
 
-export default function FollowersPage() {
+export default function ProfileFollowing() {
   const { principalId } = useParams();
   const navigate = useNavigate();
-  const { user, stats, followersList, isLoading, loadProfile } =
+  const { user, stats, followingList, isLoading, loadProfile } =
     useUserProfile(principalId);
 
   useEffect(() => {
@@ -19,25 +19,27 @@ export default function FollowersPage() {
 
   const targetName = user?.username || 'User';
   const count =
-    typeof stats?.followersCount === 'number' ? stats.followersCount : 0;
+    typeof stats?.followingCount === 'number' ? stats.followingCount : 0;
 
-  const items = Array.isArray(followersList) ? followersList : [];
+  const items = Array.isArray(followingList) ? followingList : [];
 
-  const renderAvatar = (u: FollowersInterface) => {
+  const renderAvatar = (u: FollowingInterface) => {
     const url =
-      u?.followers.profile_picture ||
-      `data:image/svg+xml;utf8,${encodeURIComponent(avatarSvg((u?.followers.username || 'U').toUpperCase()))}`;
+      u?.following.profile_picture ||
+      `data:image/svg+xml;utf8,${encodeURIComponent(
+        avatarSvg((u?.following.username || 'U').toUpperCase()),
+      )}`;
     return (
       <img
         src={url}
-        alt={u?.followers.username || 'avatar'}
+        alt={u?.following.username || 'avatar'}
         className="h-10 w-10 rounded-full ring-2 ring-white/10 object-cover"
       />
     );
   };
 
-  const getPrincipal = (u: FollowersInterface) => u.principal_id;
-  const getName = (u: FollowersInterface) => u?.followers.username;
+  const getPrincipal = (u: FollowingInterface) => u.principal_id;
+  const getName = (u: FollowingInterface) => u?.following.username;
 
   return (
     <div className="min-h-screen bg-[#0A0E17] text-white">
@@ -54,13 +56,13 @@ export default function FollowersPage() {
       <main className="relative mx-auto max-w-5xl px-4 sm:px-6 py-8">
         <div className="mb-4 flex items-center gap-2">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/profiles/${principalId}`)}
             className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3 py-2 text-xs hover:bg-white/5"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          {principalId ? (
+          {/* {principalId ? (
             <Link
               to={`/profiles/${principalId}`}
               className="text-xs text-sky-400 hover:text-sky-300"
@@ -74,7 +76,7 @@ export default function FollowersPage() {
             >
               View Profile
             </Link>
-          )}
+          )} */}
         </div>
 
         <motion.section
@@ -87,7 +89,7 @@ export default function FollowersPage() {
             <div className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               <h1 className="text-sm font-semibold">
-                {targetName}'s Followers
+                {targetName}'s Following
               </h1>
             </div>
             <div className="text-[11px] text-white/60">{count} total</div>
@@ -99,13 +101,13 @@ export default function FollowersPage() {
                 <>
                   <Link
                     to={`/profiles/${principalId}/followers`}
-                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold"
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white"
                   >
                     Followers
                   </Link>
                   <Link
                     to={`/profiles/${principalId}/following`}
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white"
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold"
                   >
                     Following
                   </Link>
@@ -114,13 +116,13 @@ export default function FollowersPage() {
                 <>
                   <Link
                     to={`/followers`}
-                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold"
+                    className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white"
                   >
                     Followers
                   </Link>
                   <Link
                     to={`/following`}
-                    className="rounded-full border border-white/10 px-3 py-1.5 text-xs text-white/80 hover:border-white/20 hover:text-white"
+                    className="rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold"
                   >
                     Following
                   </Link>
@@ -149,7 +151,7 @@ export default function FollowersPage() {
 
             {!isLoading && items.length === 0 && (
               <div className="px-5 py-10 text-center text-sm text-white/70">
-                No followers yet.
+                Not following anyone yet.
               </div>
             )}
 
@@ -185,7 +187,7 @@ export default function FollowersPage() {
                         View
                       </Link>
                       <button className="rounded-lg bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">
-                        Follow
+                        Unfollow
                       </button>
                     </div>
                   </div>
