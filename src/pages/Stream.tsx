@@ -78,13 +78,36 @@ export default function StreamPage() {
       type: SocketMessageType.ChatMessage,
       data: {
         userId: currentUser!.principal_id,
-        streamId: user.principal_id,
+        streamId: stream!.streamId,
         content,
       },
     };
     socketRef.current.send(JSON.stringify(payload));
     messageInputRef.current.value = '';
   };
+
+  useEffect(() => {
+    if (stream) {
+      socketRef.current = new WebSocket(
+        `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${stream.streamId}`,
+      );
+      socketRef.current.onmessage = (event) => {
+        const message: SocketMessage<any> = JSON.parse(event.data);
+        switch (message.type) {
+          case SocketMessageType.ChatMessage:
+            handleIncomingMessage(message.data);
+            break;
+          case SocketMessageType.ViewerCount:
+            setViewerCount(message.data);
+            break;
+        }
+      };
+    }
+    return () => {
+      socketRef.current?.close();
+      socketRef.current = null!;
+    };
+  }, [stream]);
 
   useEffect(() => {
     if (!principalId) {
@@ -94,21 +117,9 @@ export default function StreamPage() {
     loadProfile(principalId);
     getStreamByStreamerID(principalId).then((s) => {
       if (s) setStream(s);
+      console.log('Stream data:', s);
     });
-    socketRef.current = new WebSocket(
-      `ws://${process.env.VITE_BACKEND_HOST}:${process.env.VITE_BACKEND_PORT}/api/v1/chats/ws/${principalId}`,
-    );
-    socketRef.current.onmessage = (event) => {
-      const message: SocketMessage<any> = JSON.parse(event.data);
-      switch (message.type) {
-        case SocketMessageType.ChatMessage:
-          handleIncomingMessage(message.data);
-          break;
-        case SocketMessageType.ViewerCount:
-          setViewerCount(message.data);
-          break;
-      }
-    };
+
     return () => {
       socketRef.current?.close();
     };
