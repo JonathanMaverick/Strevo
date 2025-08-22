@@ -8,7 +8,6 @@ import { StreamVideoCard } from '../components/StreamVideoCard';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { User } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { TopChannels } from '../components/home/TopChannel';
 
 export default function Home() {
   const [activeStreams, setActiveStreams] = useState<Stream[]>([]);
@@ -56,7 +55,7 @@ export default function Home() {
 
       <section className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6">
         {topStream && (
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 lg:grid-cols-2">
             <motion.div
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -106,14 +105,6 @@ export default function Home() {
                 </div>
               </div>
             </motion.div>
-
-            <motion.aside
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, delay: 0.05 }}
-            >
-              <TopChannels streams={activeStreams} />
-            </motion.aside>
           </div>
         )}
         {/* 
