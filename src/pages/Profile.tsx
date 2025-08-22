@@ -18,6 +18,9 @@ import { getStreamByStreamerID } from '../services/stream.service';
 import { HLSVideoPlayer } from '../components/HLSVideoPlayer';
 import { Stream } from '../interfaces/stream';
 import DonationModal from '../components/DonationModal';
+import { getByStreamerId } from '../services/highlight.service';
+import { Highlight } from '../interfaces/highlight';
+import HighlightModal from '../components/HighlightModal';
 
 export default function Profile() {
   const { principalId } = useParams();
@@ -30,6 +33,7 @@ export default function Profile() {
     recentSubscribers,
   } = useUserProfile(principalId);
   const [streamHistory, setStreamHistory] = useState<StreamHistory[]>([]);
+  const [highlights, setHighlights] = useState<Highlight[]>([]);
   const {
     isFollowing,
     handleFollow,
@@ -38,10 +42,11 @@ export default function Profile() {
     followLoading,
     unfollowLoading,
   } = useFollowing();
-  const [activeTab, setActiveTab] = useState<'videos' | 'clips'>('videos');
+  const [activeTab, setActiveTab] = useState<'videos' | 'highlights'>('videos');
   const [stream, setStream] = useState<Stream | undefined>();
   const [isLive, setIsLive] = useState(false);
   const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [openHighlight, setOpenHighlight] = useState<Highlight | null>(null);
 
   const fetchedForId = useRef<string | null>(null);
 
@@ -53,9 +58,11 @@ export default function Profile() {
     Promise.all([
       getAllStreamHistory(principalId),
       getStreamByStreamerID(principalId),
-    ]).then(([history, s]) => {
+      getByStreamerId(principalId),
+    ]).then(([history, s, h]) => {
       if (history) setStreamHistory(history);
       if (s) setStream(s);
+      if (h) setHighlights(h);
     });
 
     checkFollowingStatus(principalId);
@@ -153,7 +160,7 @@ export default function Profile() {
                     <p className="mt-1 text-sm text-white/70">{bio}</p>
                   </div>
                   <div className="mt-3 flex items-center gap-2 sm:mt-0">
-                    {stream && (
+                    {isLive ? (
                       <Link
                         className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 px-3 py-2 text-xs font-semibold"
                         to={`/stream/${user?.principal_id}`}
@@ -161,6 +168,11 @@ export default function Profile() {
                         <PlayCircle className="h-4 w-4" />
                         Watch Live
                       </Link>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-white/60">
+                        <PlayCircle className="h-4 w-4" />
+                        Streamer is offline
+                      </div>
                     )}
 
                     {!isOwnProfile && (
@@ -235,7 +247,7 @@ export default function Profile() {
           </div>
         </section>
 
-        {stream && (
+        {stream && isLive && (
           <section className="my-6">
             <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03]">
               <div className="flex items-center justify-between px-4 py-3">
@@ -271,7 +283,7 @@ export default function Profile() {
               <div className="flex gap-2 overflow-x-auto">
                 {[
                   { key: 'videos', label: 'Videos' },
-                  { key: 'clips', label: 'Clips' },
+                  { key: 'highlights', label: 'Highlights' },
                 ].map((t) => (
                   <button
                     key={t.key}
@@ -330,31 +342,54 @@ export default function Profile() {
                   </div>
                 )}
 
-                {activeTab === 'clips' && (
+                {activeTab === 'highlights' && (
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {clips.map((c, i) => (
-                      <a
-                        key={i}
-                        href="#"
-                        className="group overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
-                      >
+                    {highlights.map((h) => {
+                      const start = Number.parseFloat(h.startHighlight) || 0;
+                      const end = Number.parseFloat(h.endHighlight) || 0;
+                      const dur = Math.max(0, end - start);
+                      const durLabel = new Date(dur * 1000)
+                        .toISOString()
+                        .slice(14, 19);
+
+                      return (
                         <div
-                          className={`relative aspect-video w-full bg-gradient-to-br ${c.color}`}
+                          key={h.highlightID}
+                          onClick={() => setOpenHighlight(h)}
+                          className="group cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.05]"
                         >
-                          <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
-                            {c.length}
+                          <div className="relative aspect-video w-full">
+                            <video
+                              src={h.highlightUrl}
+                              muted
+                              loop
+                              playsInline
+                              preload="metadata"
+                              className="absolute inset-0 h-full w-full object-cover"
+                            />
+                            <div className="absolute right-2 bottom-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                              {durLabel}
+                            </div>
+                            {/* <div className="absolute left-2 top-2 rounded-md bg-black/40 px-2 py-1 text-[10px]">
+                              {`${start.toFixed(0)}s → ${end.toFixed(0)}s`}
+                            </div> */}
+                          </div>
+                          <div className="p-3">
+                            <p className="line-clamp-2 text-xs text-white/70">
+                              {h.highlightDescription}
+                            </p>
+                            <p className="mt-1 text-[10px] text-white/50">
+                              Tap to watch
+                            </p>
                           </div>
                         </div>
-                        <div className="p-3">
-                          <p className="line-clamp-1 text-sm font-medium">
-                            {c.title}
-                          </p>
-                          <p className="mt-1 text-xs text-white/60">
-                            {c.views} views
-                          </p>
-                        </div>
-                      </a>
-                    ))}
+                      );
+                    })}
+                    {!highlights.length && (
+                      <div className="text-xs text-white/60">
+                        No highlights yet
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -431,6 +466,12 @@ export default function Profile() {
         recipientPrincipalId={user?.principal_id || ''}
         recipientUsername={user?.username}
       />
+      <HighlightModal
+        isOpen={!!openHighlight}
+        highlight={openHighlight}
+        onClose={() => setOpenHighlight(null)}
+      />
+
       <Footer />
     </div>
   );
