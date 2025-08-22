@@ -39,7 +39,12 @@ export function VideoPlayer({ url }: { url: string }) {
     }, 3000);
   }, [playing]);
 
-  const togglePlay = () => {
+  const togglePlay = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    
     const video = videoRef.current;
     if (!video) return;
 
@@ -96,6 +101,14 @@ export function VideoPlayer({ url }: { url: string }) {
     }
   };
 
+  // Handle video click to toggle play/pause
+  const handleVideoClick = (e: React.MouseEvent) => {
+    // Only toggle play if we're not clicking on controls
+    if (e.target === videoRef.current) {
+      togglePlay(e);
+    }
+  };
+
   // 🎯 handle progress & duration
   useEffect(() => {
     const video = videoRef.current;
@@ -134,7 +147,6 @@ export function VideoPlayer({ url }: { url: string }) {
     setCurrentTime(newTime);
   };
 
-  // 🕒 format time helper
   const formatTime = (time: number) => {
     if (isNaN(time) || !isFinite(time)) return '0:00';
     const minutes = Math.floor(time / 60);
@@ -226,6 +238,7 @@ export function VideoPlayer({ url }: { url: string }) {
         playsInline
         muted={muted}
         src={url}
+        onClick={handleVideoClick}
       />
 
       {/* Loading overlay */}
@@ -250,24 +263,27 @@ export function VideoPlayer({ url }: { url: string }) {
 
       {/* Click to play overlay */}
       {!playing && !isLoading && !videoError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+        <div 
+          className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+          onClick={togglePlay}
+        >
           <button
             onClick={togglePlay}
-            className="rounded-full bg-white/20 p-4 backdrop-blur hover:bg-white/30 transition-colors"
+            className="rounded-full bg-white/20 p-4 backdrop-blur hover:bg-white/30 transition-colors pointer-events-none"
           >
-            <Play className="h-8 w-8 ml-1" />
+            <Play className="h-8 w-8 ml-1 text-white" />
           </button>
         </div>
       )}
 
       {/* Video controls */}
       <div
-        className={`absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300 ${
+        className={`absolute inset-0 flex flex-col justify-end p-4 transition-opacity duration-300 pointer-events-none ${
           showControls || !playing ? 'opacity-100' : 'opacity-0'
         }`}
       >
         {/* ⏳ Progress bar */}
-        <div className="flex items-center gap-2 text-white text-xs mb-2">
+        <div className="flex items-center gap-2 text-white text-xs mb-2 pointer-events-auto">
           <span>{formatTime(currentTime)}</span>
           <input
             type="range"
@@ -284,11 +300,11 @@ export function VideoPlayer({ url }: { url: string }) {
           <span>{formatTime(duration)}</span>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pointer-events-auto">
           <div className="flex items-center gap-2 rounded-xl bg-black/40 p-2 backdrop-blur">
             <button
               onClick={togglePlay}
-              className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+              className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors text-white"
               aria-label={playing ? 'Pause' : 'Play'}
             >
               {playing ? (
@@ -302,7 +318,7 @@ export function VideoPlayer({ url }: { url: string }) {
               <button
                 onClick={toggleMute}
                 onMouseEnter={() => setShowVolumeSlider(true)}
-                className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+                className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors text-white"
                 aria-label={muted ? 'Unmute' : 'Mute'}
               >
                 {muted || volume === 0 ? (
@@ -341,7 +357,7 @@ export function VideoPlayer({ url }: { url: string }) {
           <div className="flex items-center gap-2 rounded-xl bg-black/40 p-2 backdrop-blur">
             <button
               onClick={toggleFullscreen}
-              className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
+              className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors text-white"
               aria-label="Fullscreen"
             >
               <Maximize2 className="h-4 w-4" />
@@ -349,6 +365,16 @@ export function VideoPlayer({ url }: { url: string }) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+// Demo component to test the video player
+export default function VideoPlayerDemo() {
+  return (
+    <div className="p-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6">Fixed Video Player</h1>
+      <VideoPlayer url="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" />
     </div>
   );
 }

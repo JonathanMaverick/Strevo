@@ -36,13 +36,6 @@ export function HLSVideoPlayer({
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const QUALITY_OPTIONS = [
-    { label: '1080p', value: '1080p' },
-    { label: '720p', value: '720p' },
-    { label: '480p', value: '480p' },
-    { label: 'Auto', value: 'auto' },
-  ];
-
   const resetControlsTimeout = useCallback(() => {
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -238,11 +231,6 @@ export function HLSVideoPlayer({
     }
   };
 
-  const handleQualityChange = (quality: string) => {
-    setCurrentQuality(quality);
-    setShowQualityMenu(false);
-  };
-
   useEffect(() => {
     setupHLS();
     const cleanup = handleVideoEvents();
@@ -376,31 +364,6 @@ export function HLSVideoPlayer({
 
         <div className="flex items-center gap-2">
           <div className="flex items-center gap-2 rounded-xl bg-black/40 p-2 backdrop-blur">
-            <div className="relative">
-              <button
-                onClick={() => setShowQualityMenu(!showQualityMenu)}
-                className="rounded-lg bg-white/10 p-2 text-[10px] hover:bg-white/15 transition-colors min-w-[50px]"
-              >
-                {currentQuality}
-              </button>
-
-              {showQualityMenu && (
-                <div className="absolute bottom-full right-0 mb-2 bg-black/80 backdrop-blur rounded-lg overflow-hidden">
-                  {QUALITY_OPTIONS.map((option) => (
-                    <button
-                      key={option.value}
-                      onClick={() => handleQualityChange(option.value)}
-                      className={`block w-full px-3 py-2 text-[10px] text-left hover:bg-white/10 transition-colors ${
-                        currentQuality === option.value ? 'bg-blue-500/20' : ''
-                      }`}
-                    >
-                      {option.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
             <button
               onClick={toggleFullscreen}
               className="rounded-lg bg-white/10 p-2 hover:bg-white/15 transition-colors"
