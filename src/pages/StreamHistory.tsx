@@ -277,7 +277,7 @@ export default function StreamHistoryPage() {
                 {history.messages?.length ? (
                   history.messages.map((m, i) => (
                     <div key={i} className="text-xs">
-                      <span className="text-white/60">{m.senderID}:</span>{' '}
+                      <span className="text-white/60">{m.username}:</span>{' '}
                       <span className="text-white/90">{m.content}</span>
                     </div>
                   ))

@@ -59,9 +59,13 @@ export default function Profile() {
       getAllStreamHistory(principalId),
       getStreamByStreamerID(principalId),
       getByStreamerId(principalId),
+      
     ]).then(([history, s, h]) => {
       if (history) setStreamHistory(history);
-      if (s) setStream(s);
+      if (s) {
+        setStream(s);
+        setIsLive(true);
+      }
       if (h) setHighlights(h);
     });
 

@@ -1,3 +1,4 @@
+import { ChatMessage } from "./chat-message";
 import { StreamMessage } from './stream-message';
 
 export interface StreamHistory {
@@ -9,7 +10,7 @@ export interface StreamHistory {
   title: string;
   thumbnail: string;
   categoryName: string;
-  messages: StreamMessage[];
+  messages: ChatMessage[];
   totalView: number;
   createdAt: string;
 }
