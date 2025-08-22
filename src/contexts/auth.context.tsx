@@ -150,7 +150,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const getUserData = (): User | null => {
     if (!isConnected || !effectivePrincipal) return null;
     const result = userData as MotokoResult<User, string> | null | undefined;
+
     if (!isOkResult(result)) return null;
+
+    if (result.ok.bio && typeof (result.ok.bio) != 'string') {
+      result.ok.bio = (result.ok.bio as unknown as string[]).join("");
+    }
     return result.ok;
   };
 

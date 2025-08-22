@@ -59,6 +59,8 @@ export default function SettingsForm({ user }: { user: User }) {
         });
       }
 
+      console.log('bio is ', bio)
+
       const payload = {
         username: displayName.trim(),
         bio: bio && bio !== '' ? [bio.trim()] : [],
