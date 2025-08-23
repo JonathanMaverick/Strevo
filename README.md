@@ -1,54 +1,114 @@
-# Vite + React + Motoko
+# Strevo
 
-### Get started directly in your browser:
+## Introduction
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/rvanasa/vite-react-motoko)
+Strevo is a next-generation live streaming platform built on the power of **Web3 and ICP (Internet Computer Protocol)**. Unlike traditional platforms, Strevo allows users to log in seamlessly with their crypto wallets – including **AstroX Me, Plug Wallet, Infinity Wallet, and Stoic Wallet** – giving you true ownership and decentralized access.
 
-This template gives you everything you need to build a full-stack Web3 application on the [Internet Computer](https://internetcomputer.org/).
+Support your favorite streamers directly through **wallet-based donations**, making contributions secure, transparent, and borderless.
 
-For an example of a real-world dapp built using this starter project, check out the [source code](https://github.com/dfinity/feedback) for DFINITY's [Developer Experience Feedback Board](https://dx.internetcomputer.org/).
+But Strevo doesn’t stop there. We integrate cutting-edge **AI technology** to enhance both the streaming and viewing experience:
 
-## 📦 Create a New Project
+- **AI-Powered Chat Filtering**: Advanced moderation that detects even disguised offensive language to keep communities safe and inclusive.
+- **AI Auto-Highlights**: Every stream automatically generates highlight clips, so the best moments are captured and shared effortlessly.
 
-Make sure that [Node.js](https://nodejs.org/en/) `>= 16` and [`dfx`](https://internetcomputer.org/docs/current/developer-docs/build/install-upgrade-remove) `>= 0.14` are installed on your system.
+With Strevo, streaming isn’t just interactive—it’s **decentralized, intelligent, and community-driven**.
 
-Run the following commands in a new, empty project directory:
+## Architecture
 
-```sh
-npx degit rvanasa/vite-react-motoko # Download this starter project
-dfx start --clean --background # Run dfx in the background
-npm run setup # Install packages, deploy canisters, and generate type bindings
+- **Frontend (React/TS)**
+    
+    Handles user login via ICP wallets (AstroX Me, Plug, Infinity, Stoic), live HLS playback, chat, and donations.
+    
+- **Motoko Canister (ICP)**
+    
+    Stores user identity and social graph (users, followers, following) on-chain, ensuring decentralized ownership.
+    
+- **Go Backend (Core API)**
+    
+    Manages streams, chat, categories, viewer history, highlights, and stream history. Provides REST/WS APIs and integrates with storage.
+    
+- **Streaming Server (Node.js + FFmpeg + NMS)**
+    
+    Ingests RTMP streams from OBS, transcodes with FFmpeg, serves HLS, and triggers events (publish, stop) to the backend.
+    
+- **AI Service (Python)**
+    
+    Provides advanced chat moderation (detecting disguised offensive words) and automatic highlight generation from live streams.
 
-npm start # Start the development server
+
+## ICP Features
+
+- Decentralized **user identity** and login via ICP wallets (AstroX Me, Plug, Infinity, Stoic).
+- On-chain storage of **user profiles, followers, and following** using Motoko canisters.
+- Secure **streaming key management** tied to principal IDs.
+- Wallet-based **donations** for transparent and borderless support to streamers.
+
+## [Fetch.ai](http://Fetch.ai) Features
+
+- **Moderator Agent**: Classifies live chat messages as either *playful banter (acceptable)* or *harmful content (unacceptable)*. Powered by **LLMs (ASI:One, Gemini)** for nuanced detection, even when offensive words are disguised.
+- **Highlight Agent**: Generates up to 5 highlight clips from a stream VOD, using **Whisper for transcription, FFmpeg for clip extraction, and Gemini for moment analysis**. Provides start/end timestamps, clip URLs, and contextual descriptions.
+- Agents communicate via **AgentChatProtocol** (v0.3.0), making moderation and highlight generation scalable and modular.
+
+## Run the Project
+
+Clone the repository:
+```
+git clone https://github.com/JonathanMaverick/Strevo.git
 ```
 
-When ready, run `dfx deploy --network ic` to deploy your application to the Internet Computer.
+Start DFX:
+```
+dfx start --clean --background
+```
 
-## 🛠️ Technology Stack
+Set up and run the project:
+```
+npm run setup   # Install npm packages
+npm run start   # Run the program
+```
 
-- [Vite](https://vitejs.dev/): high-performance tooling for front-end web development
-- [React](https://reactjs.org/): a component-based UI library
-- [TypeScript](https://www.typescriptlang.org/): JavaScript extended with syntax for types
-- [Sass](https://sass-lang.com/): an extended syntax for CSS stylesheets
-- [Prettier](https://prettier.io/): code formatting for a wide range of supported languages
-- [Motoko](https://github.com/dfinity/motoko#readme): a safe and simple programming language for the Internet Computer
-- [Mops](https://mops.one): an on-chain community package manager for Motoko
-- [mo-dev](https://github.com/dfinity/motoko-dev-server#readme): a live reload development server for Motoko
-- [@ic-reactor](https://github.com/B3Pay/ic-reactor): A suite of JavaScript libraries for seamless frontend development on the Internet Computer
+Initialize the Git submodule:
+```
+git submodule init
+git submodule update
+```
 
-## 📚 Documentation
+Run the Go backend:
+```
+cd streaming-backend/
+go run .
+```
 
-- [Vite developer docs](https://vitejs.dev/guide/)
-- [React quick start guide](https://react.dev/learn)
-- [Internet Computer docs](https://internetcomputer.org/docs/current/developer-docs/ic-overview)
-- [`dfx.json` reference schema](https://internetcomputer.org/docs/current/references/dfx-json-reference/)
-- [Motoko developer docs](https://internetcomputer.org/docs/current/developer-docs/build/cdks/motoko-dfinity/motoko/)
-- [Mops usage instructions](https://j4mwm-bqaaa-aaaam-qajbq-cai.ic0.app/#/docs/install)
-- [@ic-reactor/react](https://b3pay.github.io/ic-reactor/modules/react.html)
+Run the AI services:
+```
+cd streaming-ai/
+python highlight_agent.py
+python highlight_moderator.py
+```
 
-## 💡 Tips and Tricks
+Run the streaming server:
+```
+cd streaming-server/
+node index.js
+```
 
-- Customize your project's code style by editing the `.prettierrc` file and then running `npm run format`.
-- Reduce the latency of update calls by passing the `--emulator` flag to `dfx start`.
-- Install a Motoko package by running `npx ic-mops add <package-name>`. Here is a [list of available packages](https://mops.one/).
-- Split your frontend and backend console output by running `npm run frontend` and `npm run backend` in separate terminals.
+## Challenges
+
+- Running **real-time moderation** with Moderator Agent while keeping chat latency low.
+- Ensuring **video transcription + highlight extraction** doesn’t overload the pipeline during or right after live streams.
+- Synchronizing clip metadata between **Fetch.ai agents** and the **Go backend** (highlight DB).
+- Handling **false positives** in chat classification (playful banter wrongly flagged as toxic).
+- Managing **AI service scaling** under high traffic or simultaneous streams.
+
+## Future Plans
+
+- Expand **multi-language moderation** with Moderator Agent to serve global audiences.
+- Use Highlight Agent not just for post-stream VOD, but also for **real-time highlight suggestions** during live sessions.
+- Integrate **autonomous AI agents** for personalized stream recommendations (e.g., suggest highlights or trending moments).
+
+## Technical Difficulties
+
+- Integration between **Go backend, Node.js streaming server, and Python AI services** while maintaining stability.
+- Performance trade-off: **Whisper transcription + FFmpeg cutting** can be heavy on long VODs.
+- Maintaining **moderation accuracy** with evolving slang, memes, or obfuscation.
+- Handling **protocol versioning** between Agentverse agents and Strevo backend services.
