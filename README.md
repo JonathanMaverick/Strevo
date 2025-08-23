@@ -1,5 +1,7 @@
 # Strevo
 
+![Demo](assets/Stream.gif)
+
 ## Introduction
 
 Strevo is a next-generation live streaming platform built on the power of **Web3 and ICP (Internet Computer Protocol)**. Unlike traditional platforms, Strevo allows users to log in seamlessly with their crypto wallets – including **AstroX Me, Plug Wallet, Infinity Wallet, and Stoic Wallet** – giving you true ownership and decentralized access.
