@@ -103,8 +103,11 @@ node index.js
 ## Future Plans
 
 - Expand **multi-language moderation** with Moderator Agent to serve global audiences.
-- Use Highlight Agent not just for post-stream VOD, but also for **real-time highlight suggestions** during live sessions.
-- Integrate **autonomous AI agents** for personalized stream recommendations (e.g., suggest highlights or trending moments).
+- Use Highlight Agent not just for post-stream VOD, but also for real-time highlight suggestions during live sessions
+- Mobile App (iOS & Android)
+- Advanced Creator Dashboard
+- Global Launch
+- Ad Integration and Subscription
 
 ## Technical Difficulties
 
