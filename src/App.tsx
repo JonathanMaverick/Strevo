@@ -17,7 +17,6 @@ import { SocketProvider } from './contexts/socket.context';
 import { ToastProvider } from './contexts/toast.context';
 import Settings from './pages/Settings';
 import { AuthProvider } from './contexts/auth.context';
-import StreamExample from './pages/stream-example';
 import StreamHistoryPage from './pages/StreamHistory';
 import EditStreamInfo from './pages/EditStreamInfo';
 import StartStream from './pages/StartStream';
@@ -62,10 +61,6 @@ function App() {
                 <Route
                   path="/stream-history/:streamHistoryId"
                   element={<StreamHistoryPage />}
-                />
-                <Route
-                  path="/stream-ex/:streamerId"
-                  element={<StreamExample />}
                 />
                 <Route path="/settings" element={<Settings />} />
                 <Route
