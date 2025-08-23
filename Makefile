@@ -18,7 +18,7 @@ frontend:
 	@echo "Starting frontend"
 
 ifeq ($(OS),Linux)
-	gnome-terminal -- bash -c "cd $(PWD)npm run start; exec bash"
+	gnome-terminal -- bash -c "npm run start; exec bash"
 endif
 
 ifeq ($(OS),Darwin)

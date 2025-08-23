@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Crown, User, Send, X, DollarSign } from 'lucide-react';
+import { Crown, User, Send, X, DollarSign, Heart } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { useFollowing } from '../services/follow.service';
 import Loading from './Loading';
 import { Stream } from '../interfaces/stream';
 import { getStreamByStreamerID } from '../services/stream.service';
+import DonationModal from '../components/DonationModal';
 
 const formatViewerCount = (count: number) => {
   if (count >= 1000000) return `${(count / 1000000).toFixed(1)}M`;
@@ -43,9 +44,6 @@ export default function StreamPage() {
   const [viewerCount, setViewerCount] = useState(0);
   const [stream, setStream] = useState<Stream | undefined>();
   const [donateOpen, setDonateOpen] = useState(false);
-  const [donateAmount, setDonateAmount] = useState<string>('');
-  const [donateError, setDonateError] = useState<string>('');
-  const [donating, setDonating] = useState(false);
 
   const isAuthenticated = !!currentUser;
 
@@ -130,32 +128,6 @@ export default function StreamPage() {
     if (user) checkFollowingStatus(user.principal_id);
   }, [user]);
 
-  const openDonate = () => {
-    setDonateAmount('');
-    setDonateError('');
-    setDonateOpen(true);
-  };
-
-  const closeDonate = () => {
-    if (donating) return;
-    setDonateOpen(false);
-  };
-
-  const submitDonate = (e: FormEvent) => {
-    e.preventDefault();
-    const amt = Number(donateAmount);
-    if (isNaN(amt) || amt <= 0) {
-      setDonateError('Please enter a valid amount greater than 0.');
-      return;
-    }
-    setDonateError('');
-    setDonating(true);
-    setTimeout(() => {
-      setDonating(false);
-      setDonateOpen(false);
-    }, 600);
-  };
-
   if (!isProfileLoaded) return <Loading />;
 
   return (
@@ -188,9 +160,6 @@ export default function StreamPage() {
               >
                 {user?.username}
               </Link>
-              <div className="flex items-center gap-2 text-xs text-white/70">
-                <span>{tags.length ? tags.join(' • ') : '—'}</span>
-              </div>
             </div>
           </div>
           {isAuthenticated && !isOwnProfile && (
@@ -212,15 +181,11 @@ export default function StreamPage() {
                   Follow
                 </button>
               )}
-              <button className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20">
-                <Crown className="h-4 w-4" />
-                Subscribe
-              </button>
               <button
                 className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
-                onClick={openDonate}
+                onClick={() => setDonateOpen(true)}
               >
-                <DollarSign className="h-4 w-4" />
+                <Heart className="h-4 w-4" />
                 Donate
               </button>
               <button
@@ -366,71 +331,12 @@ export default function StreamPage() {
 
       <Footer />
 
-      {donateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60" onClick={closeDonate} />
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
-            className="relative z-10 w-full max-w-md rounded-2xl border border-white/10 bg-[#0E1320] p-5 shadow-2xl"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold">
-                Donate to {user?.username}
-              </h3>
-              <button
-                onClick={closeDonate}
-                className="rounded-lg border border-white/10 p-1 hover:border-white/20"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-            <form onSubmit={submitDonate} className="mt-4 space-y-4">
-              <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
-                <DollarSign className="h-4 w-4 opacity-80" />
-                <input
-                  inputMode="decimal"
-                  pattern="^[0-9]*[.]?[0-9]*$"
-                  value={donateAmount}
-                  onChange={(e) => setDonateAmount(e.target.value)}
-                  placeholder="Enter amount"
-                  className="w-full bg-transparent text-sm outline-none placeholder:text-white/40"
-                />
-              </div>
-              {donateError && (
-                <div className="text-xs text-red-400">{donateError}</div>
-              )}
-              {!isAuthenticated && (
-                <div className="rounded-xl bg-yellow-500/10 p-2 text-xs text-yellow-300">
-                  You must sign in to donate.
-                </div>
-              )}
-              <div className="flex items-center justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={closeDonate}
-                  className="rounded-xl border border-white/10 px-3 py-2 text-xs hover:border-white/20"
-                  disabled={donating}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={!isAuthenticated || donating}
-                  className={`rounded-xl px-3 py-2 text-xs font-semibold ${
-                    !isAuthenticated || donating
-                      ? 'bg-white/10 cursor-not-allowed opacity-60'
-                      : 'bg-gradient-to-r from-sky-500 to-blue-600'
-                  }`}
-                >
-                  {donating ? 'Processing...' : 'Donate'}
-                </button>
-              </div>
-            </form>
-          </motion.div>
-        </div>
-      )}
+      <DonationModal
+        isOpen={donateOpen}
+        onClose={() => setDonateOpen(false)}
+        recipientPrincipalId={user?.principal_id || ''}
+        recipientUsername={user?.username}
+      />
     </div>
   );
 }
