@@ -1,7 +1,6 @@
 # Strevo
 ![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
 
-
 ![Demo](assets/Stream.gif)
 
 ## Introduction
@@ -55,9 +54,11 @@ With Strevo, streaming isn’t just interactive—it’s **decentralized, intell
 
 Moderator:
 [Moderator Agent](https://agentverse.ai/agents/details/agent1q07trs7qwy9avqjn89zpgxl09m4q905ezzd6k22spnxeu5wc8m70xa38xvl/profile)
+![Moderator Agent](assets/moderator_agent.png)
 
 Highlight:
 [Highlight Agent](https://agentverse.ai/agents/details/agent1qfjrx8ydryswclh3qzxpz62z7d5hl405a877850620pqzrhnwwclvaem7vf/profile)
+![Highlight Agent](assets/highlight_agent.png)
 
 ## Run the Project
 
