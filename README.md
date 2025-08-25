@@ -1,4 +1,6 @@
 # Strevo
+![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
+
 
 ![Demo](assets/Stream.gif)
 
@@ -50,6 +52,12 @@ With Strevo, streaming isn’t just interactive—it’s **decentralized, intell
 - **Moderator Agent**: Classifies live chat messages as either *playful banter (acceptable)* or *harmful content (unacceptable)*. Powered by **LLMs (ASI:One, Gemini)** for nuanced detection, even when offensive words are disguised.
 - **Highlight Agent**: Generates up to 5 highlight clips from a stream VOD, using **Whisper for transcription, FFmpeg for clip extraction, and Gemini for moment analysis**. Provides start/end timestamps, clip URLs, and contextual descriptions.
 - Agents communicate via **AgentChatProtocol** (v0.3.0), making moderation and highlight generation scalable and modular.
+
+Moderator:
+[Moderator Agent](https://agentverse.ai/agents/details/agent1q07trs7qwy9avqjn89zpgxl09m4q905ezzd6k22spnxeu5wc8m70xa38xvl/profile)
+
+Highlight:
+[Highlight Agent](https://agentverse.ai/agents/details/agent1qfjrx8ydryswclh3qzxpz62z7d5hl405a877850620pqzrhnwwclvaem7vf/profile)
 
 ## Run the Project
 
