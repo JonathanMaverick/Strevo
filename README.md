@@ -94,7 +94,7 @@ Run the AI services:
 ```
 cd streaming-ai/
 python highlight_agent.py
-python highlight_moderator.py
+python moderator_agent.py
 ```
 
 Run the streaming server:
